@@ -52,7 +52,7 @@
             margin-bottom: 25px;
         }
 
-        #start-screen, #level-select-screen, #game-area, #result-screen, #name-input-screen {
+        #start-screen, #level-select-screen, #game-area, #result-screen, #name-input-screen, #login-screen {
             display: none;
             animation: fadeIn 1s ease-in-out;
         }
@@ -236,7 +236,7 @@
         }
 
         /* Name input styles */
-        #name-input {
+        #name-input, #login-name-input {
             padding: 10px;
             font-size: 1.5rem;
             border-radius: 10px;
@@ -279,9 +279,17 @@
         </div>
 
         <div id="name-input-screen">
-            <h2>ใส่ชื่อของคุณ</h2>
+            <h2>สมัครชื่อใหม่</h2>
             <input type="text" id="name-input" placeholder="กรอกชื่อของคุณที่นี่">
-            <button id="submit-name-button" class="main-button">เริ่มเล่น</button>
+            <button id="submit-name-button" class="main-button">สมัครเลย</button>
+            <button id="go-to-login-button" class="main-button">ฉันเคยเล่นแล้ว</button>
+        </div>
+
+        <div id="login-screen">
+            <h2>เข้าสู่ระบบ</h2>
+            <input type="text" id="login-name-input" placeholder="กรอกชื่อเดิมของคุณ">
+            <button id="login-button" class="main-button">เข้าสู่ระบบ</button>
+            <button id="go-to-signup-button" class="main-button">สมัครชื่อใหม่</button>
         </div>
 
         <div id="level-select-screen">
@@ -349,6 +357,7 @@
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const leaderboardRef = database.ref('leaderboard');
+        const playersRef = database.ref('players');
 
         // สร้าง Audio Context สำหรับเสียง
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -382,13 +391,11 @@
         let totalTime = 0;
         let startTime = 0;
         let currentPlayerName = '';
-
-        let players = JSON.parse(localStorage.getItem('players')) || {};
-        let currentPlayerProgress = JSON.parse(localStorage.getItem('currentPlayerProgress')) || null;
         let isPaused = false;
 
         const startScreen = document.getElementById('start-screen');
         const nameInputScreen = document.getElementById('name-input-screen');
+        const loginScreen = document.getElementById('login-screen');
         const levelSelectScreen = document.getElementById('level-select-screen');
         const gameArea = document.getElementById('game-area');
         const resultScreen = document.getElementById('result-screen');
@@ -410,24 +417,23 @@
         const levelSelectButton = document.getElementById('level-select-button');
         const nameInput = document.getElementById('name-input');
         const submitNameButton = document.getElementById('submit-name-button');
+        const loginNameInput = document.getElementById('login-name-input');
+        const loginButton = document.getElementById('login-button');
         const leaderboardBody = document.getElementById('leaderboard-body');
+        const goToLoginButton = document.getElementById('go-to-login-button');
+        const goToSignupButton = document.getElementById('go-to-signup-button');
+        
+        // สถานะของผู้เล่นใน localStorage
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer')) || null;
 
-        function saveGameProgress() {
-            if (currentPlayerName) {
-                currentPlayerProgress = {
-                    name: currentPlayerName,
-                    level: currentLevel,
-                    score: score,
-                    questionIndex: currentQuestionIndex,
-                    totalTime: totalTime
-                };
-                localStorage.setItem('currentPlayerProgress', JSON.stringify(currentPlayerProgress));
+        function savePlayerState() {
+            if (currentPlayer) {
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
             }
         }
 
-        function clearGameProgress() {
-            currentPlayerProgress = null;
-            localStorage.removeItem('currentPlayerProgress');
+        function clearPlayerState() {
+            localStorage.removeItem('currentPlayer');
         }
 
         function getFakeOptions(correctAnswer) {
@@ -452,7 +458,7 @@
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     totalTime += 10;
-                    handleAnswer(null, currentWords[currentQuestionIndex - 1].english); // เฉลยคำตอบ
+                    handleAnswer(null, currentWords[currentQuestionIndex - 1].english);
                 }
             }, 1000);
         }
@@ -509,7 +515,7 @@
             }
 
             scoreElement.textContent = `คะแนน: ${score}`;
-            saveGameProgress();
+            savePlayerState();
 
             setTimeout(() => {
                 showNewQuestion();
@@ -523,7 +529,7 @@
 
             const isPerfectScore = score === 30;
             const playerRecord = {
-                name: currentPlayerName,
+                name: currentPlayer.name,
                 level: currentLevel,
                 score: score,
                 total_time: totalTime
@@ -534,11 +540,9 @@
             if (isPerfectScore) {
                 resultMessage.textContent = 'ยอดเยี่ยมมาก! คุณทำคะแนนเต็ม!';
                 if (currentLevel < allWords.length) {
-                    let unlockedLevels = players[currentPlayerName]?.unlockedLevels || 1;
-                    unlockedLevels = Math.max(unlockedLevels, currentLevel + 1);
-                    players[currentPlayerName] = { ...players[currentPlayerName], unlockedLevels };
-                    localStorage.setItem('players', JSON.stringify(players));
-
+                    currentPlayer.unlockedLevels = Math.max(currentPlayer.unlockedLevels, currentLevel + 1);
+                    await playersRef.child(currentPlayer.name).update({ unlockedLevels: currentPlayer.unlockedLevels });
+                    savePlayerState();
                     continueButton.style.display = 'inline-block';
                     continueButton.onclick = () => startLevel(currentLevel + 1);
                 } else {
@@ -549,16 +553,14 @@
                 resultMessage.textContent = `คะแนนยังไม่เต็ม ลองใหม่อีกครั้งนะ!`;
                 continueButton.style.display = 'none';
             }
-            clearGameProgress();
+            clearPlayerState();
         }
         
-        // ฟังก์ชันใหม่: บันทึกคะแนนลงใน Firebase
         async function saveScoreToFirebase(record) {
             const newScoreRef = leaderboardRef.push();
             await newScoreRef.set(record);
         }
 
-        // ฟังก์ชันใหม่: ดึงและแสดงผลอันดับจาก Firebase
         function displayLeaderboard() {
             leaderboardRef.limitToFirst(10).orderByChild('score').on('value', (snapshot) => {
                 const data = snapshot.val();
@@ -589,24 +591,29 @@
             document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
             startScreen.style.display = 'block';
             displayLeaderboard();
-            if (currentPlayerProgress) {
-                resumeLastGameButton.style.display = 'inline-block';
-            } else {
-                resumeLastGameButton.style.display = 'none';
-            }
         }
 
-        function showNameInputScreen() {
+        function showSignupScreen() {
             document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
             nameInputScreen.style.display = 'block';
             nameInput.value = '';
+        }
+
+        function showLoginScreen() {
+            document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
+            loginScreen.style.display = 'block';
+            loginNameInput.value = '';
         }
 
         async function showLevelSelectScreen() {
             document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
             levelSelectScreen.style.display = 'block';
             levelGrid.innerHTML = '';
-            const unlockedLevels = players[currentPlayerName]?.unlockedLevels || 1;
+            
+            const playerSnapshot = await playersRef.child(currentPlayer.name).once('value');
+            const unlockedLevels = playerSnapshot.val()?.unlockedLevels || 1;
+            currentPlayer.unlockedLevels = unlockedLevels;
+            savePlayerState();
 
             for (let i = 1; i <= allWords.length; i++) {
                 const button = document.createElement('button');
@@ -623,14 +630,13 @@
         }
 
         function startLevel(level, resume = false) {
-            currentPlayerName = nameInput.value || (currentPlayerProgress ? currentPlayerProgress.name : 'ผู้เล่น');
             currentLevel = level;
             currentWords = allWords[level - 1];
             
-            if (resume) {
-                score = currentPlayerProgress.score;
-                currentQuestionIndex = currentPlayerProgress.questionIndex;
-                totalTime = currentPlayerProgress.totalTime;
+            if (resume && currentPlayer) {
+                score = currentPlayer.score;
+                currentQuestionIndex = currentPlayer.questionIndex;
+                totalTime = currentPlayer.totalTime;
             } else {
                 score = 0;
                 currentQuestionIndex = 0;
@@ -654,7 +660,11 @@
             homeButton.style.display = 'inline-block';
             levelSelectButton.style.display = 'inline-block';
             optionsContainer.style.pointerEvents = 'none';
-            saveGameProgress();
+            // อัปเดตสถานะผู้เล่นเมื่อหยุดเกม
+            currentPlayer.score = score;
+            currentPlayer.questionIndex = currentQuestionIndex;
+            currentPlayer.totalTime = totalTime;
+            savePlayerState();
         }
 
         function resumeGame() {
@@ -668,33 +678,52 @@
         }
 
         // Event Listeners
-        startButton.addEventListener('click', () => {
-            clearGameProgress();
-            showNameInputScreen();
-        });
+        startButton.addEventListener('click', showSignupScreen);
+        goToLoginButton.addEventListener('click', showLoginScreen);
+        goToSignupButton.addEventListener('click', showSignupScreen);
+
         submitNameButton.addEventListener('click', async () => {
             const name = nameInput.value.trim();
             if (name) {
-                const snapshot = await database.ref('leaderboard').orderByChild('name').equalTo(name).once('value');
+                const snapshot = await playersRef.child(name).once('value');
                 if (snapshot.exists()) {
                     alert('ชื่อนี้ถูกใช้แล้ว กรุณาใช้ชื่ออื่น');
                 } else {
-                    currentPlayerName = name;
-                    if (!players[currentPlayerName]) {
-                        players[currentPlayerName] = { unlockedLevels: 1 };
-                        localStorage.setItem('players', JSON.stringify(players));
-                    }
+                    currentPlayer = { name: name, unlockedLevels: 1 };
+                    await playersRef.child(name).set(currentPlayer);
+                    savePlayerState();
                     showLevelSelectScreen();
                 }
             } else {
                 alert('กรุณาใส่ชื่อของคุณก่อน!');
             }
         });
-        resumeLastGameButton.addEventListener('click', () => {
-            if (currentPlayerProgress) {
-                startLevel(currentPlayerProgress.level, true);
+
+        loginButton.addEventListener('click', async () => {
+            const name = loginNameInput.value.trim();
+            if (name) {
+                const snapshot = await playersRef.child(name).once('value');
+                if (snapshot.exists()) {
+                    currentPlayer = snapshot.val();
+                    savePlayerState();
+                    showLevelSelectScreen();
+                } else {
+                    alert('ไม่พบชื่อผู้เล่นนี้ กรุณาตรวจสอบชื่ออีกครั้ง');
+                }
+            } else {
+                alert('กรุณาใส่ชื่อของคุณก่อน!');
             }
         });
+
+        resumeLastGameButton.addEventListener('click', () => {
+            if (currentPlayer && currentPlayer.questionIndex < allWords[currentPlayer.level - 1].length) {
+                startLevel(currentPlayer.level, true);
+            } else {
+                alert('ไม่พบเกมที่เล่นค้างไว้');
+                showStartScreen();
+            }
+        });
+
         restartButton.addEventListener('click', showLevelSelectScreen);
         pauseButton.addEventListener('click', pauseGame);
         resumeButton.addEventListener('click', resumeGame);
@@ -702,7 +731,15 @@
         levelSelectButton.addEventListener('click', showLevelSelectScreen);
 
         // แสดงหน้าจอเริ่มต้นเมื่อโหลด
-        document.addEventListener('DOMContentLoaded', showStartScreen);
+        document.addEventListener('DOMContentLoaded', () => {
+            if (currentPlayer) {
+                document.getElementById('start-screen').style.display = 'block';
+                resumeLastGameButton.style.display = 'inline-block';
+            } else {
+                document.getElementById('start-screen').style.display = 'block';
+            }
+            displayLeaderboard();
+        });
     </script>
 </body>
 </html>
