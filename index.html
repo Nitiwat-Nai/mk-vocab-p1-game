@@ -4,7 +4,6 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เกมทายคำศัพท์แสนสนุก 🌈</title>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Mitr:wght@400;700&display=swap');
 
@@ -264,7 +263,6 @@
                         <tr>
                             <th>อันดับ</th>
                             <th>ชื่อ</th>
-                            <th>เลเวล</th>
                             <th>คะแนน</th>
                             <th>เวลา</th>
                         </tr>
@@ -341,12 +339,6 @@
             [{ thai: "ไกล", english: "far" }, { thai: "ทำให้ชัดเจน", english: "clear" }, { thai: "เด็กผู้หญิง", english: "girl" }, { thai: "ให้", english: "give" }, { thai: "ได้ยิน", english: "hear" }, { thai: "เจ้าภาพ,เจ้าบ้าน", english: "host" }, { thai: "เเมลง", english: "insects" }, { thai: "ข้างใน", english: "inside" }, { thai: "ว่าว", english: "kite" }, { thai: "เด็ก", english: "kid" }, { thai: "ขา", english: "leg" }, { thai: "สิงโต", english: "lion" }, { thai: "รอยแผลเป็น", english: "mark" }, { thai: "เสื่อ,ที่รอง", english: "mat" }, { thai: "ใหม่", english: "new" }, { thai: "เปิด", english: "open" }, { thai: "ผ่าน", english: "pass" }, { thai: "ความสงบเรียบร้อย", english: "peace" }, { thai: "สีแดง", english: "red" }, { thai: "รวย", english: "rich" }, { thai: "หน่วย", english: "unit" }, { thai: "น่ากลัว", english: "scary" }, { thai: "เมล็ด", english: "seed" }, { thai: "ด้านข้าง", english: "side" }, { thai: "ทั้งหมด", english: "all" }, { thai: "ข้อสอบ", english: "test" }, { thai: "เล็กมาก", english: "tiny" }, { thai: "ขึ้น", english: "up" }, { thai: "ไวโอลิน", english: "violin" }, { thai: "ผนัง", english: "wall" }, { thai: "ต้องการ", english: "want" }]
         ];
 
-        // กำหนดค่าการเชื่อมต่อ Supabase ที่นี่
-        import { createClient } from '@supabase/supabase-js'
-        const supabaseUrl = 'https://febxspsoxfoyckiammcu.supabase.co'
-        const supabaseKey = process.env.SUPABASE_KEY
-        const supabase = createClient(supabaseUrl, supabaseKey)
-
         // สร้าง Audio Context สำหรับเสียง
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(isCorrect) {
@@ -380,6 +372,7 @@
         let startTime = 0;
         let currentPlayerName = '';
 
+        // เก็บข้อมูลผู้เล่นและเลเวลที่ปลดล็อค
         let players = JSON.parse(localStorage.getItem('players')) || {};
         let currentPlayerProgress = JSON.parse(localStorage.getItem('currentPlayerProgress')) || null;
 
@@ -511,7 +504,7 @@
             }, 1000);
         }
 
-        async function endLevel() {
+        function endLevel() {
             gameArea.style.display = 'none';
             resultScreen.style.display = 'block';
             finalScoreElement.textContent = `${score} / 30`;
@@ -523,10 +516,9 @@
                     name: currentPlayerName,
                     level: currentLevel,
                     score: score,
-                    total_time: totalTime
+                    totalTime: totalTime
                 };
-                
-                await saveScoreToSupabase(playerRecord);
+                saveScore(playerRecord);
                 
                 if (currentLevel < allWords.length) {
                     let unlockedLevels = players[currentPlayerName]?.unlockedLevels || 1;
@@ -546,59 +538,46 @@
             }
             clearGameProgress();
         }
-        
-        // ฟังก์ชันใหม่: บันทึกคะแนนลงใน Supabase
-        async function saveScoreToSupabase(record) {
-            // ตรวจสอบว่าผู้เล่นเคยทำคะแนนเต็มในเลเวลนี้หรือไม่
-            const { data: existingData, error } = await supabase
-                .from('leaderboard')
-                .select('score, total_time')
-                .eq('name', record.name)
-                .eq('level', record.level)
-                .single();
 
-            if (existingData) {
-                // หากเคยทำแล้ว ให้เปรียบเทียบคะแนนและเวลา
-                if (record.score > existingData.score || (record.score === existingData.score && record.total_time < existingData.total_time)) {
-                    await supabase
-                        .from('leaderboard')
-                        .update(record)
-                        .eq('name', record.name)
-                        .eq('level', record.level);
+        function saveScore(newRecord) {
+            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
+            
+            // ตรวจสอบว่ามีผู้เล่นนี้ในอันดับแล้วหรือไม่
+            const existingIndex = leaderboard.findIndex(p => p.name === newRecord.name && p.level === newRecord.level);
+            
+            if (existingIndex > -1) {
+                // ถ้ามีอยู่แล้ว ให้อัปเดตเฉพาะคะแนนและเวลาที่ด
+                if (newRecord.score > leaderboard[existingIndex].score || (newRecord.score === leaderboard[existingIndex].score && newRecord.totalTime < leaderboard[existingIndex].totalTime)) {
+                    leaderboard[existingIndex] = newRecord;
                 }
             } else {
-                // หากเป็นครั้งแรกที่ทำคะแนนเต็ม ให้เพิ่มข้อมูลใหม่
-                await supabase
-                    .from('leaderboard')
-                    .insert([record]);
-            }
-            displayLeaderboard();
-        }
-        
-        // ฟังก์ชันใหม่: ดึงและแสดงผลอันดับจาก Supabase
-        async function displayLeaderboard() {
-            const { data, error } = await supabase
-                .from('leaderboard')
-                .select('*')
-                .order('score', { ascending: false })
-                .order('total_time', { ascending: true })
-                .limit(10);
-            
-            if (error) {
-                console.error('Error fetching leaderboard:', error);
-                leaderboardBody.innerHTML = '<tr><td colspan="4">ไม่สามารถโหลดอันดับได้</td></tr>';
-                return;
+                leaderboard.push(newRecord);
             }
 
+            // จัดเรียงอันดับใหม่
+            leaderboard.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score;
+                }
+                return a.totalTime - b.totalTime;
+            });
+
+            // เก็บแค่ 10 อันดับแรก
+            leaderboard = leaderboard.slice(0, 10);
+            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
+            displayLeaderboard();
+        }
+
+        function displayLeaderboard() {
+            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
             leaderboardBody.innerHTML = '';
-            data.forEach((record, index) => {
+            leaderboard.forEach((record, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${record.name}</td>
-                    <td>${record.level}</td>
                     <td>${record.score}</td>
-                    <td>${record.total_time} วินาที</td>
+                    <td>${record.totalTime} วินาที</td>
                 `;
                 leaderboardBody.appendChild(row);
             });
@@ -719,4 +698,3 @@
     </script>
 </body>
 </html>
-
