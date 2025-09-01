@@ -341,15 +341,15 @@
             // Level 10
             [{ thai: "ไกล", english: "far" }, { thai: "ทำให้ชัดเจน", english: "clear" }, { thai: "เด็กผู้หญิง", english: "girl" }, { thai: "ให้", english: "give" }, { thai: "ได้ยิน", english: "hear" }, { thai: "เจ้าภาพ,เจ้าบ้าน", english: "host" }, { thai: "เเมลง", english: "insects" }, { thai: "ว่าว", english: "kite" }, { thai: "เด็ก", english: "kid" }, { thai: "ขา", english: "leg" }, { thai: "สิงโต", english: "lion" }, { thai: "รอยแผลเป็น", english: "mark" }, { thai: "เสื่อ,ที่รอง", english: "mat" }, { thai: "ใหม่", english: "new" }, { thai: "เปิด", english: "open" }, { thai: "ผ่าน", english: "pass" }, { thai: "ความสงบเรียบร้อย", english: "peace" }, { thai: "สีแดง", english: "red" }, { thai: "รวย", english: "rich" }, { thai: "หน่วย", english: "unit" }, { thai: "น่ากลัว", english: "scary" }, { thai: "เมล็ด", english: "seed" }, { thai: "ด้านข้าง", english: "side" }, { thai: "ทั้งหมด", english: "all" }, { thai: "ข้อสอบ", english: "test" }, { thai: "เล็กมาก", english: "tiny" }, { thai: "ขึ้น", english: "up" }, { thai: "ไวโอลิน", english: "violin" }, { thai: "ผนัง", english: "wall" }, { thai: "ต้องการ", english: "want" }, { thai: "ข้างใน", english: "inside" }]
         ];
-        
+
         // กำหนดค่าการเชื่อมต่อ Firebase ที่นี่
         const firebaseConfig = {
-          databaseURL: "https://my-word-game-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app/",
+            databaseURL: "https://my-word-game-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app/",
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
         const leaderboardRef = database.ref('leaderboard');
-        
+
         // สร้าง Audio Context สำหรับเสียง
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(isCorrect) {
@@ -385,6 +385,7 @@
 
         let players = JSON.parse(localStorage.getItem('players')) || {};
         let currentPlayerProgress = JSON.parse(localStorage.getItem('currentPlayerProgress')) || null;
+        let isPaused = false;
 
         const startScreen = document.getElementById('start-screen');
         const nameInputScreen = document.getElementById('name-input-screen');
@@ -445,12 +446,13 @@
             startTime = Date.now();
             countdownElement.textContent = timeLeft;
             timerInterval = setInterval(() => {
+                if (isPaused) return;
                 timeLeft--;
                 countdownElement.textContent = timeLeft;
                 if (timeLeft <= 0) {
                     clearInterval(timerInterval);
                     totalTime += 10;
-                    handleAnswer(null, null);
+                    handleAnswer(null, currentWords[currentQuestionIndex - 1].english); // เฉลยคำตอบ
                 }
             }, 1000);
         }
@@ -520,17 +522,17 @@
             finalScoreElement.textContent = `${score} / 30`;
 
             const isPerfectScore = score === 30;
+            const playerRecord = {
+                name: currentPlayerName,
+                level: currentLevel,
+                score: score,
+                total_time: totalTime
+            };
+            
+            await saveScoreToFirebase(playerRecord);
+            
             if (isPerfectScore) {
                 resultMessage.textContent = 'ยอดเยี่ยมมาก! คุณทำคะแนนเต็ม!';
-                const playerRecord = {
-                    name: currentPlayerName,
-                    level: currentLevel,
-                    score: score,
-                    total_time: totalTime
-                };
-                
-                await saveScoreToFirebase(playerRecord);
-                
                 if (currentLevel < allWords.length) {
                     let unlockedLevels = players[currentPlayerName]?.unlockedLevels || 1;
                     unlockedLevels = Math.max(unlockedLevels, currentLevel + 1);
@@ -600,7 +602,7 @@
             nameInput.value = '';
         }
 
-        function showLevelSelectScreen() {
+        async function showLevelSelectScreen() {
             document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
             levelSelectScreen.style.display = 'block';
             levelGrid.innerHTML = '';
@@ -646,6 +648,7 @@
 
         function pauseGame() {
             clearInterval(timerInterval);
+            isPaused = true;
             pauseButton.style.display = 'none';
             resumeButton.style.display = 'inline-block';
             homeButton.style.display = 'inline-block';
@@ -660,6 +663,7 @@
             levelSelectButton.style.display = 'none';
             pauseButton.style.display = 'inline-block';
             optionsContainer.style.pointerEvents = 'auto';
+            isPaused = false;
             startTimer();
         }
 
@@ -668,15 +672,20 @@
             clearGameProgress();
             showNameInputScreen();
         });
-        submitNameButton.addEventListener('click', () => {
+        submitNameButton.addEventListener('click', async () => {
             const name = nameInput.value.trim();
             if (name) {
-                currentPlayerName = name;
-                if (!players[currentPlayerName]) {
-                    players[currentPlayerName] = { unlockedLevels: 1 };
-                    localStorage.setItem('players', JSON.stringify(players));
+                const snapshot = await database.ref('leaderboard').orderByChild('name').equalTo(name).once('value');
+                if (snapshot.exists()) {
+                    alert('ชื่อนี้ถูกใช้แล้ว กรุณาใช้ชื่ออื่น');
+                } else {
+                    currentPlayerName = name;
+                    if (!players[currentPlayerName]) {
+                        players[currentPlayerName] = { unlockedLevels: 1 };
+                        localStorage.setItem('players', JSON.stringify(players));
+                    }
+                    showLevelSelectScreen();
                 }
-                showLevelSelectScreen();
             } else {
                 alert('กรุณาใส่ชื่อของคุณก่อน!');
             }
