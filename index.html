@@ -4,6 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เกมทายคำศัพท์แสนสนุก 🌈</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Mitr:wght@400;700&display=swap');
 
@@ -263,6 +265,7 @@
                         <tr>
                             <th>อันดับ</th>
                             <th>ชื่อ</th>
+                            <th>เลเวล</th>
                             <th>คะแนน</th>
                             <th>เวลา</th>
                         </tr>
@@ -336,9 +339,17 @@
             // Level 9
             [{ thai: "เป็นลอน", english: "wavy" }, { thai: "ป่วย", english: "sick" }, { thai: "หาว", english: "yawn" }, { thai: "ปลาย", english: "tip" }, { thai: "อารมณ์เสีย", english: "upset" }, { thai: "รางวัล", english: "prize" }, { thai: "วัน", english: "day" }, { thai: "ซึ่งอยู่ในป่า", english: "wild" }, { thai: "จุด", english: "dot" }, { thai: "โยเกิร์ต", english: "yogurt" }, { thai: "ฤดูหนาว", english: "winter" }, { thai: "เร็ว", english: "fast" }, { thai: "รู้สึก", english: "feel" }, { thai: "ขว้าง", english: "pitch" }, { thai: "หลังคา", english: "roof" }, { thai: "หน้า", english: "page" }, { thai: "ตีก้นลงโทษ", english: "spank" }, { thai: "การกระทำ", english: "action" }, { thai: "ตั้งเป้าหมาย", english: "aim" }, { thai: "คำตอบ", english: "answer" }, { thai: "ไม่ดี", english: "bad" }, { thai: "ธนาคาร", english: "bank" }, { thai: "ผึ้ง", english: "bee" }, { thai: "ร่างกาย", english: "body" }, { thai: "หมวก", english: "cap" }, { thai: "รถยนต์", english: "car" }, { thai: "ฝาปิด", english: "cover" }, { thai: "ตาย", english: "die" }, { thai: "อาหารค่ำ", english: "dinner" }, { thai: "เพลิดเพลิน", english: "enjoy" }],
             // Level 10
-            [{ thai: "ไกล", english: "far" }, { thai: "ทำให้ชัดเจน", english: "clear" }, { thai: "เด็กผู้หญิง", english: "girl" }, { thai: "ให้", english: "give" }, { thai: "ได้ยิน", english: "hear" }, { thai: "เจ้าภาพ,เจ้าบ้าน", english: "host" }, { thai: "เเมลง", english: "insects" }, { thai: "ข้างใน", english: "inside" }, { thai: "ว่าว", english: "kite" }, { thai: "เด็ก", english: "kid" }, { thai: "ขา", english: "leg" }, { thai: "สิงโต", english: "lion" }, { thai: "รอยแผลเป็น", english: "mark" }, { thai: "เสื่อ,ที่รอง", english: "mat" }, { thai: "ใหม่", english: "new" }, { thai: "เปิด", english: "open" }, { thai: "ผ่าน", english: "pass" }, { thai: "ความสงบเรียบร้อย", english: "peace" }, { thai: "สีแดง", english: "red" }, { thai: "รวย", english: "rich" }, { thai: "หน่วย", english: "unit" }, { thai: "น่ากลัว", english: "scary" }, { thai: "เมล็ด", english: "seed" }, { thai: "ด้านข้าง", english: "side" }, { thai: "ทั้งหมด", english: "all" }, { thai: "ข้อสอบ", english: "test" }, { thai: "เล็กมาก", english: "tiny" }, { thai: "ขึ้น", english: "up" }, { thai: "ไวโอลิน", english: "violin" }, { thai: "ผนัง", english: "wall" }, { thai: "ต้องการ", english: "want" }]
+            [{ thai: "ไกล", english: "far" }, { thai: "ทำให้ชัดเจน", english: "clear" }, { thai: "เด็กผู้หญิง", english: "girl" }, { thai: "ให้", english: "give" }, { thai: "ได้ยิน", english: "hear" }, { thai: "เจ้าภาพ,เจ้าบ้าน", english: "host" }, { thai: "เเมลง", english: "insects" }, { thai: "ว่าว", english: "kite" }, { thai: "เด็ก", english: "kid" }, { thai: "ขา", english: "leg" }, { thai: "สิงโต", english: "lion" }, { thai: "รอยแผลเป็น", english: "mark" }, { thai: "เสื่อ,ที่รอง", english: "mat" }, { thai: "ใหม่", english: "new" }, { thai: "เปิด", english: "open" }, { thai: "ผ่าน", english: "pass" }, { thai: "ความสงบเรียบร้อย", english: "peace" }, { thai: "สีแดง", english: "red" }, { thai: "รวย", english: "rich" }, { thai: "หน่วย", english: "unit" }, { thai: "น่ากลัว", english: "scary" }, { thai: "เมล็ด", english: "seed" }, { thai: "ด้านข้าง", english: "side" }, { thai: "ทั้งหมด", english: "all" }, { thai: "ข้อสอบ", english: "test" }, { thai: "เล็กมาก", english: "tiny" }, { thai: "ขึ้น", english: "up" }, { thai: "ไวโอลิน", english: "violin" }, { thai: "ผนัง", english: "wall" }, { thai: "ต้องการ", english: "want" }, { thai: "ข้างใน", english: "inside" }]
         ];
-
+        
+        // กำหนดค่าการเชื่อมต่อ Firebase ที่นี่
+        const firebaseConfig = {
+          databaseURL: "https://my-word-game-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app/",
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const leaderboardRef = database.ref('leaderboard');
+        
         // สร้าง Audio Context สำหรับเสียง
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
         function playSound(isCorrect) {
@@ -372,7 +383,6 @@
         let startTime = 0;
         let currentPlayerName = '';
 
-        // เก็บข้อมูลผู้เล่นและเลเวลที่ปลดล็อค
         let players = JSON.parse(localStorage.getItem('players')) || {};
         let currentPlayerProgress = JSON.parse(localStorage.getItem('currentPlayerProgress')) || null;
 
@@ -504,7 +514,7 @@
             }, 1000);
         }
 
-        function endLevel() {
+        async function endLevel() {
             gameArea.style.display = 'none';
             resultScreen.style.display = 'block';
             finalScoreElement.textContent = `${score} / 30`;
@@ -516,9 +526,10 @@
                     name: currentPlayerName,
                     level: currentLevel,
                     score: score,
-                    totalTime: totalTime
+                    total_time: totalTime
                 };
-                saveScore(playerRecord);
+                
+                await saveScoreToFirebase(playerRecord);
                 
                 if (currentLevel < allWords.length) {
                     let unlockedLevels = players[currentPlayerName]?.unlockedLevels || 1;
@@ -538,48 +549,36 @@
             }
             clearGameProgress();
         }
-
-        function saveScore(newRecord) {
-            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            
-            // ตรวจสอบว่ามีผู้เล่นนี้ในอันดับแล้วหรือไม่
-            const existingIndex = leaderboard.findIndex(p => p.name === newRecord.name && p.level === newRecord.level);
-            
-            if (existingIndex > -1) {
-                // ถ้ามีอยู่แล้ว ให้อัปเดตเฉพาะคะแนนและเวลาที่ด
-                if (newRecord.score > leaderboard[existingIndex].score || (newRecord.score === leaderboard[existingIndex].score && newRecord.totalTime < leaderboard[existingIndex].totalTime)) {
-                    leaderboard[existingIndex] = newRecord;
-                }
-            } else {
-                leaderboard.push(newRecord);
-            }
-
-            // จัดเรียงอันดับใหม่
-            leaderboard.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
-                }
-                return a.totalTime - b.totalTime;
-            });
-
-            // เก็บแค่ 10 อันดับแรก
-            leaderboard = leaderboard.slice(0, 10);
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
-            displayLeaderboard();
+        
+        // ฟังก์ชันใหม่: บันทึกคะแนนลงใน Firebase
+        async function saveScoreToFirebase(record) {
+            const newScoreRef = leaderboardRef.push();
+            await newScoreRef.set(record);
         }
 
+        // ฟังก์ชันใหม่: ดึงและแสดงผลอันดับจาก Firebase
         function displayLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            leaderboardBody.innerHTML = '';
-            leaderboard.forEach((record, index) => {
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td>${index + 1}</td>
-                    <td>${record.name}</td>
-                    <td>${record.score}</td>
-                    <td>${record.totalTime} วินาที</td>
-                `;
-                leaderboardBody.appendChild(row);
+            leaderboardRef.limitToFirst(10).orderByChild('score').on('value', (snapshot) => {
+                const data = snapshot.val();
+                const leaderboardBody = document.getElementById('leaderboard-body');
+                leaderboardBody.innerHTML = '';
+                
+                if (data) {
+                    const sortedData = Object.values(data).sort((a, b) => b.score - a.score || a.total_time - b.total_time);
+                    sortedData.forEach((record, index) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${record.name}</td>
+                            <td>${record.level}</td>
+                            <td>${record.score}</td>
+                            <td>${record.total_time} วินาที</td>
+                        `;
+                        leaderboardBody.appendChild(row);
+                    });
+                } else {
+                    leaderboardBody.innerHTML = '<tr><td colspan="5">ไม่มีอันดับคะแนน</td></tr>';
+                }
             });
         }
 
