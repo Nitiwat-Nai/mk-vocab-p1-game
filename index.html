@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>เกมทายคำศัพท์แสนสนุก 🌈</title>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Mitr:wght@400;700&display=swap');
 
@@ -263,6 +264,7 @@
                         <tr>
                             <th>อันดับ</th>
                             <th>ชื่อ</th>
+                            <th>เลเวล</th>
                             <th>คะแนน</th>
                             <th>เวลา</th>
                         </tr>
@@ -330,7 +332,7 @@
             // Level 6
             [{ thai: "เกลือ", english: "salt" }, { thai: "ชีส", english: "cheese" }, { thai: "น้ำตาล", english: "sugar" }, { thai: "พาสต้า", english: "pasta" }, { thai: "ฮอทดอก", english: "hot dog" }, { thai: "มะเขือเทศ", english: "tomato" }, { thai: "แครอท", english: "carrot" }, { thai: "น้ำ", english: "water" }, { thai: "นม", english: "milk" }, { thai: "น้ำผลไม้", english: "juice" }, { thai: "น้ำอัดลม", english: "soda" }, { thai: "เครื่องดื่มปั่นผสมนม และไอศครีม", english: "milkshake" }, { thai: "กาแฟ", english: "coffee" }, { thai: "ชา", english: "tea" }, { thai: "เหล้าองุ่น, ไวน์", english: "wine" }, { thai: "กระหายน้ำ", english: "thirsty" }, { thai: "โค้ก", english: "cola" }, { thai: "เบียร์", english: "beer" }, { thai: "ชาเย็น", english: "ice tea" }, { thai: "กิน", english: "eat" }, { thai: "นอน", english: "sleep" }, { thai: "ดื่ม", english: "drink" }, { thai: "งีบ", english: "nap" }, { thai: "พักผ่อน", english: "rest" }, { thai: "อ่าน", english: "read" }, { thai: "ปรุงอาหาร", english: "cook" }, { thai: "เดิน", english: "walk" }, { thai: "ขับขาน, สวด, ท่อง", english: "chant" }, { thai: "กระโดดขาเดียว", english: "hop" }, { thai: "กระโดด", english: "jump" }],
             // Level 7
-            [{ thai: "การปีนเขา", english: "mountaineering" }, { thai: "การพักแรม", english: "camping" }, { thai: "กีฬาโบว์ลิ่ง", english: "bowling" }, { thai: "การขี่ม้า", english: "riding" }, { thai: "กีฬาขี่จักรยาน", english: "cycling" }, { thai: "การพายเรือแคนู", english: "canoeing" }, { thai: "การเดินทางไกลด้วยเท้า", english: "hiking" }, { thai: "ออกกำลังกาย", english: "exercise" }, { thai: "กีฬาดำน้ำลึก", english: "diving" }, { thai: "ดู", english: "watch" }, { thai: "การเล่นกระดานโต้คลื่น", english: "surfing" }, { thai: "เล่น", english: "play" }, { thai: "การซื้อของ", english: "shopping" }, { thai: "ตกปลา", english: "fishing" }, { thai: "การว่ายน้ำ", english: "swimming" }, { thai: "การวิ่ง", english: "running" }, { thai: "การเล่นสกี", english: "skiing" }, { thai: "การแล่นเรือใบ", english: "sailing" }, { thai: "การร่องแพ,การล่องแก่ง", english: "rafting" }, { thai: "การพายเรือคายัค", english: "kayaking" }, { thai: "กีฬาสำรวจและปีนถ้ำ", english: "caving" }, { thai: "กีฬาหรือกิจกรรมเล่นสเก็ต", english: "skating" }, { thai: "กิจกรรมหรือกีฬาสโนว์บอร์ด", english: "snowboarding" }, { thai: "การเดินทางท่องเที่ยวโดยไม่มีการใช้ยานพาหนะส่วนตัวให้การขนสัมภาระ ไม่ว่าจะมีการค้างแรมหรือไม่ก็ตาม", english: "backpacking" }, { thai: "การล่าสัตว์", english: "hunting" }, { thai: "กีฬา", english: "sports" }, { thai: "งานศิลปะ", english: "art" }, { thai: "งานฝีมือ, หัตถกรรม", english: "craft" }, { thai: "งอ,โค้ง, ดัด", english: "bend" }, { thai: "เอื้อม", english: "reach" }],
+            [{ thai: "การปีนเขา", english: "mountaineering" }, { thai: "การพักแรม", english: "camping" }, { thai: "กีฬาโบว์ลิ่ง", english: "bowling" }, { thai: "การขี่ม้า", english: "riding" }, { thai: "กีฬาขี่ี่จักรยาน", english: "cycling" }, { thai: "การพายเรือแคนู", english: "canoeing" }, { thai: "การเดินทางไกลด้วยเท้า", english: "hiking" }, { thai: "ออกกำลังกาย", english: "exercise" }, { thai: "กีฬาดำน้ำลึก", english: "diving" }, { thai: "ดู", english: "watch" }, { thai: "การเล่นกระดานโต้คลื่น", english: "surfing" }, { thai: "เล่น", english: "play" }, { thai: "การซื้อของ", english: "shopping" }, { thai: "ตกปลา", english: "fishing" }, { thai: "การว่ายน้ำ", english: "swimming" }, { thai: "การวิ่ง", english: "running" }, { thai: "การเล่นสกี", english: "skiing" }, { thai: "การแล่นเรือใบ", english: "sailing" }, { thai: "การร่องแพ,การล่องแก่ง", english: "rafting" }, { thai: "การพายเรือคายัค", english: "kayaking" }, { thai: "กีฬาสำรวจและปีนถ้ำ", english: "caving" }, { thai: "กีฬาหรือกิจกรรมเล่นสเก็ต", english: "skating" }, { thai: "กิจกรรมหรือกีฬาสโนว์บอร์ด", english: "snowboarding" }, { thai: "การเดินทางท่องเที่ยวโดยไม่มีการใช้ยานพาหนะส่วนตัวให้การขนสัมภาระ ไม่ว่าจะมีการค้างแรมหรือไม่ก็ตาม", english: "backpacking" }, { thai: "การล่าสัตว์", english: "hunting" }, { thai: "กีฬา", english: "sports" }, { thai: "งานศิลปะ", english: "art" }, { thai: "งานฝีมือ, หัตถกรรม", english: "craft" }, { thai: "งอ,โค้ง, ดัด", english: "bend" }, { thai: "เอื้อม", english: "reach" }],
             // Level 8
             [{ thai: "เข้ารูป, ทำให้พอดี", english: "fit" }, { thai: "ปีก", english: "wing" }, { thai: "สวนสัตว์", english: "zoo" }, { thai: "แช่", english: "soak" }, { thai: "ที่เป็นของตัวเอง", english: "own" }, { thai: "นิทาน", english: "tale" }, { thai: "สุก(ผลไม้), งอม", english: "ripe" }, { thai: "เสียง", english: "voice" }, { thai: "จุดสูงสุด", english: "top" }, { thai: "ที่เป็นที่นิยม", english: "pop" }, { thai: "คิด", english: "think" }, { thai: "ลงคะแนน", english: "vote" }, { thai: "ใช้", english: "use" }, { thai: "ไม้", english: "wood" }, { thai: "บ้าง, สิ่งใดสิ่งหนึ่ง", english: "any" }, { thai: "บาง", english: "thin" }, { thai: "ติดตั้ง, วาง, กำหนด", english: "set" }, { thai: "ซ่อม", english: "repair" }, { thai: "ลุง", english: "uncle" }, { thai: "ผ้าพันคอ", english: "scarf" }, { thai: "แถว", english: "row" }, { thai: "เท", english: "pour" }, { thai: "น่าเกลียด", english: "ugly" }, { thai: "เป็นรูปไข่,เป็นรูปรี", english: "oval" }, { thai: "เร็ว", english: "quick" }, { thai: "สัตว์เลี้ยง", english: "pet" }, { thai: "เงียบ", english: "quiet" }, { thai: "การแข่งขัน", english: "race" }, { thai: "ลำต้น", english: "stem" }, { thai: "ร้อยกรอง, กลอน", english: "verse" }],
             // Level 9
@@ -338,6 +340,11 @@
             // Level 10
             [{ thai: "ไกล", english: "far" }, { thai: "ทำให้ชัดเจน", english: "clear" }, { thai: "เด็กผู้หญิง", english: "girl" }, { thai: "ให้", english: "give" }, { thai: "ได้ยิน", english: "hear" }, { thai: "เจ้าภาพ,เจ้าบ้าน", english: "host" }, { thai: "เเมลง", english: "insects" }, { thai: "ข้างใน", english: "inside" }, { thai: "ว่าว", english: "kite" }, { thai: "เด็ก", english: "kid" }, { thai: "ขา", english: "leg" }, { thai: "สิงโต", english: "lion" }, { thai: "รอยแผลเป็น", english: "mark" }, { thai: "เสื่อ,ที่รอง", english: "mat" }, { thai: "ใหม่", english: "new" }, { thai: "เปิด", english: "open" }, { thai: "ผ่าน", english: "pass" }, { thai: "ความสงบเรียบร้อย", english: "peace" }, { thai: "สีแดง", english: "red" }, { thai: "รวย", english: "rich" }, { thai: "หน่วย", english: "unit" }, { thai: "น่ากลัว", english: "scary" }, { thai: "เมล็ด", english: "seed" }, { thai: "ด้านข้าง", english: "side" }, { thai: "ทั้งหมด", english: "all" }, { thai: "ข้อสอบ", english: "test" }, { thai: "เล็กมาก", english: "tiny" }, { thai: "ขึ้น", english: "up" }, { thai: "ไวโอลิน", english: "violin" }, { thai: "ผนัง", english: "wall" }, { thai: "ต้องการ", english: "want" }]
         ];
+
+        // กำหนดค่าการเชื่อมต่อ Supabase ที่นี่
+        const SUPABASE_URL = 'YOUR_SUPABASE_URL_HERE'; // *** ใส่ URL ของคุณที่นี่ ***
+        const SUPABASE_KEY = 'YOUR_SUPABASE_KEY_HERE'; // *** ใส่ API Key ของคุณที่นี่ ***
+        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
 
         // สร้าง Audio Context สำหรับเสียง
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -372,7 +379,6 @@
         let startTime = 0;
         let currentPlayerName = '';
 
-        // เก็บข้อมูลผู้เล่นและเลเวลที่ปลดล็อค
         let players = JSON.parse(localStorage.getItem('players')) || {};
         let currentPlayerProgress = JSON.parse(localStorage.getItem('currentPlayerProgress')) || null;
 
@@ -504,7 +510,7 @@
             }, 1000);
         }
 
-        function endLevel() {
+        async function endLevel() {
             gameArea.style.display = 'none';
             resultScreen.style.display = 'block';
             finalScoreElement.textContent = `${score} / 30`;
@@ -516,9 +522,10 @@
                     name: currentPlayerName,
                     level: currentLevel,
                     score: score,
-                    totalTime: totalTime
+                    total_time: totalTime
                 };
-                saveScore(playerRecord);
+                
+                await saveScoreToSupabase(playerRecord);
                 
                 if (currentLevel < allWords.length) {
                     let unlockedLevels = players[currentPlayerName]?.unlockedLevels || 1;
@@ -538,46 +545,59 @@
             }
             clearGameProgress();
         }
+        
+        // ฟังก์ชันใหม่: บันทึกคะแนนลงใน Supabase
+        async function saveScoreToSupabase(record) {
+            // ตรวจสอบว่าผู้เล่นเคยทำคะแนนเต็มในเลเวลนี้หรือไม่
+            const { data: existingData, error } = await supabase
+                .from('leaderboard')
+                .select('score, total_time')
+                .eq('name', record.name)
+                .eq('level', record.level)
+                .single();
 
-        function saveScore(newRecord) {
-            let leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
-            
-            // ตรวจสอบว่ามีผู้เล่นนี้ในอันดับแล้วหรือไม่
-            const existingIndex = leaderboard.findIndex(p => p.name === newRecord.name && p.level === newRecord.level);
-            
-            if (existingIndex > -1) {
-                // ถ้ามีอยู่แล้ว ให้อัปเดตเฉพาะคะแนนและเวลาที่ด
-                if (newRecord.score > leaderboard[existingIndex].score || (newRecord.score === leaderboard[existingIndex].score && newRecord.totalTime < leaderboard[existingIndex].totalTime)) {
-                    leaderboard[existingIndex] = newRecord;
+            if (existingData) {
+                // หากเคยทำแล้ว ให้เปรียบเทียบคะแนนและเวลา
+                if (record.score > existingData.score || (record.score === existingData.score && record.total_time < existingData.total_time)) {
+                    await supabase
+                        .from('leaderboard')
+                        .update(record)
+                        .eq('name', record.name)
+                        .eq('level', record.level);
                 }
             } else {
-                leaderboard.push(newRecord);
+                // หากเป็นครั้งแรกที่ทำคะแนนเต็ม ให้เพิ่มข้อมูลใหม่
+                await supabase
+                    .from('leaderboard')
+                    .insert([record]);
             }
-
-            // จัดเรียงอันดับใหม่
-            leaderboard.sort((a, b) => {
-                if (b.score !== a.score) {
-                    return b.score - a.score;
-                }
-                return a.totalTime - b.totalTime;
-            });
-
-            // เก็บแค่ 10 อันดับแรก
-            leaderboard = leaderboard.slice(0, 10);
-            localStorage.setItem('leaderboard', JSON.stringify(leaderboard));
             displayLeaderboard();
         }
+        
+        // ฟังก์ชันใหม่: ดึงและแสดงผลอันดับจาก Supabase
+        async function displayLeaderboard() {
+            const { data, error } = await supabase
+                .from('leaderboard')
+                .select('*')
+                .order('score', { ascending: false })
+                .order('total_time', { ascending: true })
+                .limit(10);
+            
+            if (error) {
+                console.error('Error fetching leaderboard:', error);
+                leaderboardBody.innerHTML = '<tr><td colspan="4">ไม่สามารถโหลดอันดับได้</td></tr>';
+                return;
+            }
 
-        function displayLeaderboard() {
-            const leaderboard = JSON.parse(localStorage.getItem('leaderboard')) || [];
             leaderboardBody.innerHTML = '';
-            leaderboard.forEach((record, index) => {
+            data.forEach((record, index) => {
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${index + 1}</td>
                     <td>${record.name}</td>
+                    <td>${record.level}</td>
                     <td>${record.score}</td>
-                    <td>${record.totalTime} วินาที</td>
+                    <td>${record.total_time} วินาที</td>
                 `;
                 leaderboardBody.appendChild(row);
             });
