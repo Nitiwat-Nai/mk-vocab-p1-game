@@ -342,9 +342,10 @@
         ];
 
         // กำหนดค่าการเชื่อมต่อ Supabase ที่นี่
-        const SUPABASE_URL = 'https://febxspsoxfoyckiammcu.supabase.co'; // *** ใส่ URL ของคุณที่นี่ ***
-        const SUPABASE_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZlYnhzcHNveGZveWNraWFtbWN1Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NTY3MDcxNzMsImV4cCI6MjA3MjI4MzE3M30.XNCyT6ShHIyxgid35YuMpG5TYNh7giHWEJwowEgETAo'; // *** ใส่ API Key ของคุณที่นี่ ***
-        const supabase = Supabase.createClient(SUPABASE_URL, SUPABASE_KEY);
+        import { createClient } from '@supabase/supabase-js'
+        const supabaseUrl = 'https://febxspsoxfoyckiammcu.supabase.co'
+        const supabaseKey = process.env.SUPABASE_KEY
+        const supabase = createClient(supabaseUrl, supabaseKey)
 
         // สร้าง Audio Context สำหรับเสียง
         const audioContext = new (window.AudioContext || window.webkitAudioContext)();
@@ -718,3 +719,4 @@
     </script>
 </body>
 </html>
+
