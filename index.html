@@ -391,7 +391,6 @@
         let currentWords = [];
         let totalTime = 0;
         let isPaused = false;
-        let lastTime = 0;
 
         const startScreen = document.getElementById('start-screen');
         const nameInputScreen = document.getElementById('name-input-screen');
@@ -425,7 +424,6 @@
         const goToHomeFromLevelSelectButton = document.getElementById('go-to-home-from-level-select');
         
         let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer')) || null;
-        let isLoggedIn = false;
 
         function savePlayerState() {
             if (currentPlayer) {
@@ -435,7 +433,7 @@
 
         function clearPlayerState() {
             localStorage.removeItem('currentPlayer');
-            isLoggedIn = false;
+            currentPlayer = null;
         }
 
         function getFakeOptions(correctAnswer) {
@@ -452,18 +450,18 @@
 
         function startTimer() {
             if (isPaused) return;
-            let currentTimerTime = timeLeft;
-            countdownElement.textContent = Math.max(0, currentTimerTime);
+            timeLeft = 10;
+            countdownElement.textContent = timeLeft;
             timerInterval = setInterval(() => {
                 if (isPaused) {
                     clearInterval(timerInterval);
                     return;
                 }
-                currentTimerTime--;
-                countdownElement.textContent = Math.max(0, currentTimerTime);
-                if (currentTimerTime <= 0) {
+                timeLeft--;
+                countdownElement.textContent = Math.max(0, timeLeft);
+                if (timeLeft <= 0) {
                     clearInterval(timerInterval);
-                    totalTime += timeLimit; // Add full time limit for time out
+                    totalTime += 10;
                     handleAnswer(null, currentWords[currentQuestionIndex - 1].english);
                 }
             }, 1000);
@@ -493,7 +491,6 @@
                 optionsContainer.appendChild(button);
             });
 
-            timeLeft = timeLimit;
             startTimer();
             currentQuestionIndex++;
         }
@@ -503,7 +500,7 @@
             const allButtons = document.querySelectorAll('.option-button');
             allButtons.forEach(button => button.disabled = true);
             
-            const timeTaken = timeLimit - (parseInt(countdownElement.textContent) || 0);
+            const timeTaken = timeLimit - Math.max(0, timeLeft);
             totalTime += timeTaken;
 
             if (selectedOption === correctAnswer) {
@@ -523,6 +520,7 @@
 
             scoreElement.textContent = `คะแนน: ${score}`;
             
+            currentPlayer.level = currentLevel;
             currentPlayer.score = score;
             currentPlayer.questionIndex = currentQuestionIndex;
             currentPlayer.totalTime = totalTime;
@@ -565,7 +563,6 @@
                 continueButton.style.display = 'none';
             }
             
-            // Clear player state when a level is finished
             clearPlayerState();
         }
         
@@ -592,7 +589,7 @@
                         }
                         // Priority 3: Time (Ascending)
                         return a.total_time - b.total_time;
-                    });
+                    }).slice(0, 20); // Slice to show only top 20
 
                     sortedData.forEach((record, index) => {
                         const row = document.createElement('tr');
@@ -658,7 +655,7 @@
             currentLevel = level;
             currentWords = allWords[level - 1];
             
-            if (resume && currentPlayer && currentPlayer.questionIndex) {
+            if (resume) {
                 score = currentPlayer.score;
                 currentQuestionIndex = currentPlayer.questionIndex;
                 totalTime = currentPlayer.totalTime;
@@ -685,9 +682,6 @@
             homeButton.style.display = 'inline-block';
             levelSelectButton.style.display = 'inline-block';
             optionsContainer.style.pointerEvents = 'none';
-            currentPlayer.score = score;
-            currentPlayer.questionIndex = currentQuestionIndex;
-            currentPlayer.totalTime = totalTime;
             savePlayerState();
         }
 
@@ -703,7 +697,7 @@
 
         // Event Listeners
         startButton.addEventListener('click', () => {
-            if (isLoggedIn) {
+            if (currentPlayer) {
                 showLevelSelectScreen();
             } else {
                 showSignupScreen();
@@ -722,7 +716,6 @@
                 } else {
                     currentPlayer = { name: name, unlockedLevels: 1, score: 0, questionIndex: 0, totalTime: 0 };
                     await playersRef.child(name).set(currentPlayer);
-                    isLoggedIn = true;
                     savePlayerState();
                     showLevelSelectScreen();
                 }
@@ -737,7 +730,6 @@
                 const snapshot = await playersRef.child(name).once('value');
                 if (snapshot.exists()) {
                     currentPlayer = snapshot.val();
-                    isLoggedIn = true;
                     savePlayerState();
                     showLevelSelectScreen();
                 } else {
@@ -749,8 +741,8 @@
         });
 
         resumeLastGameButton.addEventListener('click', () => {
-            if (currentPlayer && currentPlayer.questionIndex < allWords[currentPlayer.level - 1].length) {
-                startLevel(currentPlayer.unlockedLevels, true);
+            if (currentPlayer && currentPlayer.questionIndex > 0) {
+                startLevel(currentPlayer.level, true);
             } else {
                 alert('ไม่พบเกมที่เล่นค้างไว้');
                 showStartScreen();
@@ -767,9 +759,10 @@
         // Initial setup on page load
         document.addEventListener('DOMContentLoaded', () => {
             currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
-            if (currentPlayer) {
-                isLoggedIn = true;
+            if (currentPlayer && currentPlayer.questionIndex > 0) {
                 resumeLastGameButton.style.display = 'inline-block';
+            } else {
+                resumeLastGameButton.style.display = 'none';
             }
             showStartScreen();
         });
