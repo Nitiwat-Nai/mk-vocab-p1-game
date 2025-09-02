@@ -295,6 +295,7 @@
         <div id="level-select-screen">
             <h1>เลือกเลเวล</h1>
             <div id="level-grid" class="level-grid"></div>
+            <button id="go-to-home-from-level-select" class="main-button">กลับหน้าหลัก</button>
         </div>
 
         <div id="game-area">
@@ -389,9 +390,8 @@
         let currentQuestionIndex = 0;
         let currentWords = [];
         let totalTime = 0;
-        let startTime = 0;
-        let currentPlayerName = '';
         let isPaused = false;
+        let lastTime = 0;
 
         const startScreen = document.getElementById('start-screen');
         const nameInputScreen = document.getElementById('name-input-screen');
@@ -422,9 +422,10 @@
         const leaderboardBody = document.getElementById('leaderboard-body');
         const goToLoginButton = document.getElementById('go-to-login-button');
         const goToSignupButton = document.getElementById('go-to-signup-button');
+        const goToHomeFromLevelSelectButton = document.getElementById('go-to-home-from-level-select');
         
-        // สถานะของผู้เล่นใน localStorage
         let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer')) || null;
+        let isLoggedIn = false;
 
         function savePlayerState() {
             if (currentPlayer) {
@@ -434,6 +435,7 @@
 
         function clearPlayerState() {
             localStorage.removeItem('currentPlayer');
+            isLoggedIn = false;
         }
 
         function getFakeOptions(correctAnswer) {
@@ -449,20 +451,24 @@
         }
 
         function startTimer() {
-            startTime = Date.now();
-            countdownElement.textContent = timeLeft;
+            if (isPaused) return;
+            let currentTimerTime = timeLeft;
+            countdownElement.textContent = Math.max(0, currentTimerTime);
             timerInterval = setInterval(() => {
-                if (isPaused) return;
-                timeLeft--;
-                countdownElement.textContent = timeLeft;
-                if (timeLeft <= 0) {
+                if (isPaused) {
                     clearInterval(timerInterval);
-                    totalTime += 10;
+                    return;
+                }
+                currentTimerTime--;
+                countdownElement.textContent = Math.max(0, currentTimerTime);
+                if (currentTimerTime <= 0) {
+                    clearInterval(timerInterval);
+                    totalTime += timeLimit; // Add full time limit for time out
                     handleAnswer(null, currentWords[currentQuestionIndex - 1].english);
                 }
             }, 1000);
         }
-
+        
         function showNewQuestion() {
             clearInterval(timerInterval);
             if (currentQuestionIndex >= currentWords.length) {
@@ -496,7 +502,8 @@
             clearInterval(timerInterval);
             const allButtons = document.querySelectorAll('.option-button');
             allButtons.forEach(button => button.disabled = true);
-            const timeTaken = Math.floor((Date.now() - startTime) / 1000);
+            
+            const timeTaken = timeLimit - (parseInt(countdownElement.textContent) || 0);
             totalTime += timeTaken;
 
             if (selectedOption === correctAnswer) {
@@ -515,6 +522,10 @@
             }
 
             scoreElement.textContent = `คะแนน: ${score}`;
+            
+            currentPlayer.score = score;
+            currentPlayer.questionIndex = currentQuestionIndex;
+            currentPlayer.totalTime = totalTime;
             savePlayerState();
 
             setTimeout(() => {
@@ -553,6 +564,8 @@
                 resultMessage.textContent = `คะแนนยังไม่เต็ม ลองใหม่อีกครั้งนะ!`;
                 continueButton.style.display = 'none';
             }
+            
+            // Clear player state when a level is finished
             clearPlayerState();
         }
         
@@ -562,13 +575,25 @@
         }
 
         function displayLeaderboard() {
-            leaderboardRef.limitToFirst(10).orderByChild('score').on('value', (snapshot) => {
+            leaderboardRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 const leaderboardBody = document.getElementById('leaderboard-body');
                 leaderboardBody.innerHTML = '';
                 
                 if (data) {
-                    const sortedData = Object.values(data).sort((a, b) => b.score - a.score || a.total_time - b.total_time);
+                    const sortedData = Object.values(data).sort((a, b) => {
+                        // Priority 1: Level (Descending)
+                        if (b.level !== a.level) {
+                            return b.level - a.level;
+                        }
+                        // Priority 2: Score (Descending)
+                        if (b.score !== a.score) {
+                            return b.score - a.score;
+                        }
+                        // Priority 3: Time (Ascending)
+                        return a.total_time - b.total_time;
+                    });
+
                     sortedData.forEach((record, index) => {
                         const row = document.createElement('tr');
                         row.innerHTML = `
@@ -633,7 +658,7 @@
             currentLevel = level;
             currentWords = allWords[level - 1];
             
-            if (resume && currentPlayer) {
+            if (resume && currentPlayer && currentPlayer.questionIndex) {
                 score = currentPlayer.score;
                 currentQuestionIndex = currentPlayer.questionIndex;
                 totalTime = currentPlayer.totalTime;
@@ -660,7 +685,6 @@
             homeButton.style.display = 'inline-block';
             levelSelectButton.style.display = 'inline-block';
             optionsContainer.style.pointerEvents = 'none';
-            // อัปเดตสถานะผู้เล่นเมื่อหยุดเกม
             currentPlayer.score = score;
             currentPlayer.questionIndex = currentQuestionIndex;
             currentPlayer.totalTime = totalTime;
@@ -678,7 +702,14 @@
         }
 
         // Event Listeners
-        startButton.addEventListener('click', showSignupScreen);
+        startButton.addEventListener('click', () => {
+            if (isLoggedIn) {
+                showLevelSelectScreen();
+            } else {
+                showSignupScreen();
+            }
+        });
+        
         goToLoginButton.addEventListener('click', showLoginScreen);
         goToSignupButton.addEventListener('click', showSignupScreen);
 
@@ -689,8 +720,9 @@
                 if (snapshot.exists()) {
                     alert('ชื่อนี้ถูกใช้แล้ว กรุณาใช้ชื่ออื่น');
                 } else {
-                    currentPlayer = { name: name, unlockedLevels: 1 };
+                    currentPlayer = { name: name, unlockedLevels: 1, score: 0, questionIndex: 0, totalTime: 0 };
                     await playersRef.child(name).set(currentPlayer);
+                    isLoggedIn = true;
                     savePlayerState();
                     showLevelSelectScreen();
                 }
@@ -705,6 +737,7 @@
                 const snapshot = await playersRef.child(name).once('value');
                 if (snapshot.exists()) {
                     currentPlayer = snapshot.val();
+                    isLoggedIn = true;
                     savePlayerState();
                     showLevelSelectScreen();
                 } else {
@@ -717,7 +750,7 @@
 
         resumeLastGameButton.addEventListener('click', () => {
             if (currentPlayer && currentPlayer.questionIndex < allWords[currentPlayer.level - 1].length) {
-                startLevel(currentPlayer.level, true);
+                startLevel(currentPlayer.unlockedLevels, true);
             } else {
                 alert('ไม่พบเกมที่เล่นค้างไว้');
                 showStartScreen();
@@ -729,16 +762,16 @@
         resumeButton.addEventListener('click', resumeGame);
         homeButton.addEventListener('click', showStartScreen);
         levelSelectButton.addEventListener('click', showLevelSelectScreen);
+        goToHomeFromLevelSelectButton.addEventListener('click', showStartScreen);
 
-        // แสดงหน้าจอเริ่มต้นเมื่อโหลด
+        // Initial setup on page load
         document.addEventListener('DOMContentLoaded', () => {
+            currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
             if (currentPlayer) {
-                document.getElementById('start-screen').style.display = 'block';
+                isLoggedIn = true;
                 resumeLastGameButton.style.display = 'inline-block';
-            } else {
-                document.getElementById('start-screen').style.display = 'block';
             }
-            displayLeaderboard();
+            showStartScreen();
         });
     </script>
 </body>
