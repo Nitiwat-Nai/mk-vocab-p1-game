@@ -1,771 +1,794 @@
 <!DOCTYPE html>
 <html lang="th">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>เกมทายคำศัพท์แสนสนุก 🌈</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
-    <style>
-        @import url('https://fonts.googleapis.com/css2?family=Mitr:wght@400;700&display=swap');
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>เกมทายคำศัพท์แสนสนุก 🌈</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-database.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Mitr:wght@400;700&display=swap');
 
-        :root {
-            --pastel-pink: #FFB6C1;
-            --pastel-blue: #ADD8E6;
-            --pastel-green: #98FB98;
-            --pastel-yellow: #FFFACD;
-            --pastel-purple: #E6E6FA;
-            --text-color: #333;
-            --correct-color: #4CAF50;
-            --wrong-color: #F44336;
-            --locked-color: #D3D3D3;
-        }
+        :root {
+            --pastel-pink: #FFB6C1;
+            --pastel-blue: #ADD8E6;
+            --pastel-green: #98FB98;
+            --pastel-yellow: #FFFACD;
+            --pastel-purple: #E6E6FA;
+            --text-color: #333;
+            --correct-color: #4CAF50;
+            --wrong-color: #F44336;
+            --locked-color: #D3D3D3;
+        }
 
-        body {
-            font-family: 'Mitr', sans-serif;
-            background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-green));
-            color: var(--text-color);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
-            text-align: center;
-            padding: 20px;
-        }
+        body {
+            font-family: 'Mitr', sans-serif;
+            background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-green));
+            color: var(--text-color);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            text-align: center;
+            padding: 20px;
+        }
 
-        .container {
-            background-color: rgba(255, 255, 255, 0.9);
-            padding: 40px;
-            border-radius: 25px;
-            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
-            width: 90%;
-            max-width: 700px;
-            position: relative;
-            border: 5px solid var(--pastel-purple);
-        }
+        .container {
+            background-color: rgba(255, 255, 255, 0.9);
+            padding: 40px;
+            border-radius: 25px;
+            box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+            width: 90%;
+            max-width: 700px;
+            position: relative;
+            border: 5px solid var(--pastel-purple);
+        }
 
-        h1 {
-            font-size: 3rem;
-            color: var(--pastel-pink);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-            margin-bottom: 25px;
-        }
+        h1 {
+            font-size: 3rem;
+            color: var(--pastel-pink);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+            margin-bottom: 25px;
+        }
 
-        #start-screen, #level-select-screen, #game-area, #result-screen, #name-input-screen, #login-screen {
-            display: none;
-            animation: fadeIn 1s ease-in-out;
-        }
+        #start-screen, #level-select-screen, #game-area, #result-screen, #name-input-screen, #login-screen {
+            display: none;
+            animation: fadeIn 1s ease-in-out;
+        }
 
-        .main-button, .level-button {
-            background-color: var(--pastel-pink);
-            color: white;
-            border: none;
-            padding: 18px 40px;
-            font-size: 1.8rem;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: transform 0.3s ease, background-color 0.3s ease;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-            margin: 10px;
-        }
+        .main-button, .level-button {
+            background-color: var(--pastel-pink);
+            color: white;
+            border: none;
+            padding: 18px 40px;
+            font-size: 1.8rem;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: transform 0.3s ease, background-color 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+            margin: 10px;
+        }
 
-        .main-button:hover, .level-button:not(.locked):hover {
-            transform: translateY(-5px) scale(1.05);
-            background-color: #FF69B4;
-        }
+        .main-button:hover, .level-button:not(.locked):hover {
+            transform: translateY(-5px) scale(1.05);
+            background-color: #FF69B4;
+        }
 
-        .level-button.locked {
-            background-color: var(--locked-color);
-            cursor: not-allowed;
-        }
+        .level-button.locked {
+            background-color: var(--locked-color);
+            cursor: not-allowed;
+        }
 
-        .level-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-            gap: 15px;
-            margin-top: 20px;
-        }
+        .level-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
 
-        .level-button {
-            padding: 20px;
-            font-size: 2rem;
-        }
+        .level-button {
+            padding: 20px;
+            font-size: 2rem;
+        }
 
-        #question {
-            font-size: 2.5rem;
-            font-weight: bold;
-            color: var(--text-color);
-            margin-bottom: 30px;
-        }
+        #question {
+            font-size: 2.5rem;
+            font-weight: bold;
+            color: var(--text-color);
+            margin-bottom: 30px;
+        }
 
-        #game-info {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
+        #game-info {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
 
-        #level-display {
-            font-size: 2rem;
-            color: var(--pastel-pink);
-            font-weight: bold;
-        }
+        #level-display {
+            font-size: 2rem;
+            color: var(--pastel-pink);
+            font-weight: bold;
+        }
 
-        .options-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 20px;
-        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
 
-        .option-button {
-            background-color: var(--pastel-blue);
-            color: black;
-            border: 3px solid var(--pastel-purple);
-            padding: 20px;
-            font-size: 1.5rem;
-            font-weight: 700;
-            border-radius: 15px;
-            cursor: pointer;
-            transition: background-color 0.3s ease, transform 0.3s ease;
-        }
+        .option-button {
+            background-color: var(--pastel-blue);
+            color: black;
+            border: 3px solid var(--pastel-purple);
+            padding: 20px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: background-color 0.3s ease, transform 0.3s ease;
+        }
 
-        .option-button:hover {
-            transform: scale(1.05);
-            background-color: #87CEFA;
-        }
+        .option-button:hover {
+            transform: scale(1.05);
+            background-color: #87CEFA;
+        }
 
-        .option-button:disabled {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
+        .option-button:disabled {
+            cursor: not-allowed;
+            opacity: 0.7;
+        }
 
-        .correct {
-            background-color: var(--correct-color) !important;
-            border-color: var(--correct-color) !important;
-            color: white !important;
-        }
+        .correct {
+            background-color: var(--correct-color) !important;
+            border-color: var(--correct-color) !important;
+            color: white !important;
+        }
 
-        .wrong {
-            background-color: var(--wrong-color) !important;
-            border-color: var(--wrong-color) !important;
-            color: white !important;
-        }
+        .wrong {
+            background-color: var(--wrong-color) !important;
+            border-color: var(--wrong-color) !important;
+            color: white !important;
+        }
 
-        #score-area, #timer-area {
-            font-size: 2rem;
-            font-weight: bold;
-        }
+        #score-area, #timer-area {
+            font-size: 2rem;
+            font-weight: bold;
+        }
 
-        #score-area {
-            color: var(--text-color);
-        }
+        #score-area {
+            color: var(--text-color);
+        }
 
-        #timer-area {
-            color: var(--wrong-color);
-            background-color: var(--pastel-yellow);
-            border-radius: 50%;
-            width: 70px;
-            height: 70px;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-        }
+        #timer-area {
+            color: var(--wrong-color);
+            background-color: var(--pastel-yellow);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
 
-        #pause-resume-buttons {
-            margin-top: 20px;
-        }
+        #pause-resume-buttons {
+            margin-top: 20px;
+        }
 
-        #pause-button, #resume-button, #home-button, #level-select-button {
-            background-color: var(--pastel-yellow);
-            color: var(--text-color);
-            font-size: 1.2rem;
-            padding: 10px 20px;
-            border-radius: 10px;
-            border: 2px solid #FFD700;
-            margin: 5px;
-        }
+        #pause-button, #resume-button, #home-button, #level-select-button {
+            background-color: var(--pastel-yellow);
+            color: var(--text-color);
+            font-size: 1.2rem;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 2px solid #FFD700;
+            margin: 5px;
+        }
 
-        #pause-button:hover, #resume-button:hover, #home-button:hover, #level-select-button:hover {
-            background-color: #FFECB3;
-        }
+        #pause-button:hover, #resume-button:hover, #home-button:hover, #level-select-button:hover {
+            background-color: #FFECB3;
+        }
 
-        #result-screen h2 {
-            font-size: 3rem;
-            color: var(--pastel-pink);
-            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
-        }
+        #result-screen h2 {
+            font-size: 3rem;
+            color: var(--pastel-pink);
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.1);
+        }
 
-        #final-score {
-            font-size: 4rem;
-            color: var(--correct-color);
-            margin: 15px 0;
-        }
+        #final-score {
+            font-size: 4rem;
+            color: var(--correct-color);
+            margin: 15px 0;
+        }
 
-        #restart-button {
-            margin-top: 25px;
-        }
+        #restart-button {
+            margin-top: 25px;
+        }
 
-        /* Leaderboard styles */
-        #leaderboard-table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
-        }
+        /* Leaderboard styles */
+        #leaderboard-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
 
-        #leaderboard-table th, #leaderboard-table td {
-            padding: 10px;
-            border-bottom: 1px solid #ddd;
-            text-align: left;
-        }
+        #leaderboard-table th, #leaderboard-table td {
+            padding: 10px;
+            border-bottom: 1px solid #ddd;
+            text-align: left;
+        }
 
-        #leaderboard-table th {
-            background-color: var(--pastel-blue);
-            color: white;
-        }
+        #leaderboard-table th {
+            background-color: var(--pastel-blue);
+            color: white;
+        }
 
-        #leaderboard-table tr:nth-child(even) {
-            background-color: #f9f9f9;
-        }
+        #leaderboard-table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
 
-        #leaderboard-table tr:hover {
-            background-color: #f1f1f1;
-        }
+        #leaderboard-table tr:hover {
+            background-color: #f1f1f1;
+        }
 
-        /* Name input styles */
-        #name-input, #login-name-input {
-            padding: 10px;
-            font-size: 1.5rem;
-            border-radius: 10px;
-            border: 2px solid var(--pastel-purple);
-            width: 80%;
-            margin: 20px 0;
-            text-align: center;
-        }
+        /* Name input styles */
+        #name-input, #login-name-input {
+            padding: 10px;
+            font-size: 1.5rem;
+            border-radius: 10px;
+            border: 2px solid var(--pastel-purple);
+            width: 80%;
+            margin: 20px 0;
+            text-align: center;
+        }
 
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-    </style>
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+    </style>
 </head>
 <body>
-    <div class="container">
+    <div class="container">
 
-        <div id="start-screen">
-            <h1>เกมทายคำศัพท์แสนสนุก 🌈</h1>
-            <p style="font-size:1.5rem;">มาทดสอบความรู้คำศัพท์ภาษาอังกฤษกันเถอะ!</p>
-            <div id="leaderboard">
-                <h3>🏆 อันดับผู้เล่นยอดเยี่ยม 🏆</h3>
-                <table id="leaderboard-table">
-                    <thead>
-                        <tr>
-                            <th>อันดับ</th>
-                            <th>ชื่อ</th>
-                            <th>เลเวล</th>
-                            <th>คะแนน</th>
-                            <th>เวลา</th>
-                        </tr>
-                    </thead>
-                    <tbody id="leaderboard-body">
-                        </tbody>
-                </table>
-            </div>
-            <button id="start-button" class="main-button">เริ่มเกมใหม่</button>
-            <button id="resume-last-game-button" class="main-button" style="display:none;">เล่นต่อจากเดิม</button>
-        </div>
+        <div id="start-screen">
+            <h1>เกมทายคำศัพท์แสนสนุก 🌈</h1>
+            <p style="font-size:1.5rem;">มาทดสอบความรู้คำศัพท์ภาษาอังกฤษกันเถอะ!</p>
+            <div id="leaderboard">
+                <h3>🏆 อันดับผู้เล่นยอดเยี่ยม 🏆</h3>
+                <table id="leaderboard-table">
+                    <thead>
+                        <tr>
+                            <th>อันดับ</th>
+                            <th>ชื่อ</th>
+                            <th>เลเวล</th>
+                            <th>คะแนน</th>
+                            <th>เวลา</th>
+                        </tr>
+                    </thead>
+                    <tbody id="leaderboard-body">
+                        </tbody>
+                </table>
+            </div>
+            <button id="start-button" class="main-button">เริ่มเกมใหม่</button>
+            <button id="resume-last-game-button" class="main-button" style="display:none;">เล่นต่อจากเดิม</button>
+        </div>
 
-        <div id="name-input-screen">
-            <h2>สมัครชื่อใหม่</h2>
-            <input type="text" id="name-input" placeholder="กรอกชื่อของคุณที่นี่">
-            <button id="submit-name-button" class="main-button">สมัครเลย</button>
-            <button id="go-to-login-button" class="main-button">ฉันเคยเล่นแล้ว</button>
-        </div>
+        <div id="name-input-screen">
+            <h2>สมัครชื่อใหม่</h2>
+            <input type="text" id="name-input" placeholder="กรอกชื่อของคุณที่นี่">
+            <button id="submit-name-button" class="main-button">สมัครเลย</button>
+            <button id="go-to-login-button" class="main-button">ฉันเคยเล่นแล้ว</button>
+        </div>
 
-        <div id="login-screen">
-            <h2>เข้าสู่ระบบ</h2>
-            <input type="text" id="login-name-input" placeholder="กรอกชื่อเดิมของคุณ">
-            <button id="login-button" class="main-button">เข้าสู่ระบบ</button>
-            <button id="go-to-signup-button" class="main-button">สมัครชื่อใหม่</button>
-        </div>
+        <div id="login-screen">
+            <h2>เข้าสู่ระบบ</h2>
+            <input type="text" id="login-name-input" placeholder="กรอกชื่อเดิมของคุณ">
+            <button id="login-button" class="main-button">เข้าสู่ระบบ</button>
+            <button id="go-to-signup-button" class="main-button">สมัครชื่อใหม่</button>
+        </div>
 
-        <div id="level-select-screen">
-            <h1>เลือกเลเวล</h1>
-            <div id="level-grid" class="level-grid"></div>
-            <button id="go-to-home-from-level-select" class="main-button">กลับหน้าหลัก</button>
-        </div>
+        <div id="level-select-screen">
+            <h1>เลือกเลเวล</h1>
+            <div id="level-grid" class="level-grid"></div>
+            <button id="go-to-home-from-level-select" class="main-button">กลับหน้าหลัก</button>
+        </div>
 
-        <div id="game-area">
-            <div id="game-info">
-                <div id="score-area"><span id="score">คะแนน: 0</span> / 30</div>
-                <div id="level-display">เลเวล: 1</div>
-                <div id="timer-area">
-                    <span id="countdown">10</span>
-                </div>
-            </div>
-            <h2 id="question"></h2>
-            <div class="options-grid" id="options-container"></div>
-            <div id="pause-resume-buttons">
-                <button id="pause-button">หยุดชั่วคราว</button>
-                <button id="resume-button" style="display:none;">เล่นต่อ</button>
-                <button id="level-select-button" style="display:none;">เลือกเลเวล</button>
-                <button id="home-button" style="display:none;">กลับหน้าหลัก</button>
-            </div>
-        </div>
+        <div id="game-area">
+            <div id="game-info">
+                <div id="score-area"><span id="score">คะแนน: 0</span> / 30</div>
+                <div id="level-display">เลเวล: 1</div>
+                <div id="timer-area">
+                    <span id="countdown">10</span>
+                </div>
+            </div>
+            <h2 id="question"></h2>
+            <div class="options-grid" id="options-container"></div>
+            <div id="pause-resume-buttons">
+                <button id="pause-button">หยุดชั่วคราว</button>
+                <button id="resume-button" style="display:none;">เล่นต่อ</button>
+                <button id="level-select-button" style="display:none;">เลือกเลเวล</button>
+                <button id="home-button" style="display:none;">กลับหน้าหลัก</button>
+            </div>
+        </div>
 
-        <div id="result-screen">
-            <h2>จบเลเวล!</h2>
-            <p style="font-size:1.5rem;">คะแนนของคุณในเลเวลนี้:</p>
-            <div id="final-score">0</div>
-            <p id="result-message"></p>
-            <button id="continue-button" class="main-button" style="display:none;">เล่นเลเวลถัดไป</button>
-            <button id="restart-button" class="main-button">กลับไปหน้าเลือกเลเวล</button>
-        </div>
-    </div>
+        <div id="result-screen">
+            <h2>จบเลเวล!</h2>
+            <p style="font-size:1.5rem;">คะแนนของคุณในเลเวลนี้:</p>
+            <div id="final-score">0</div>
+            <p id="result-message"></p>
+            <button id="continue-button" class="main-button" style="display:none;">เล่นเลเวลถัดไป</button>
+            <button id="restart-button" class="main-button">กลับไปหน้าเลือกเลเวล</button>
+        </div>
+    </div>
 
-    <script>
-        // ข้อมูลคำศัพท์ที่ถูกแบ่งเป็น 10 เลเวล (30 คำ/เลเวล)
-        const allWords = [
-            // Level 1
-            [{ thai: "ตนเอง", english: "self" }, { thai: "สูง", english: "tall" }, { thai: "เตี้ย", english: "short" }, { thai: "คล้ำ, เข้ม (สี), มืด", english: "dark" }, { thai: "สว่าง, อ่อน(สี)", english: "light" }, { thai: "ฉลาด", english: "smart" }, { thai: "มีความสุข", english: "happy" }, { thai: "เสียใจ", english: "sad" }, { thai: "น่ารัก, สวย", english: "pretty" }, { thai: "ทั่วๆไป, โดยปกติ", english: "average" }, { thai: "สงบเงียบ", english: "calm" }, { thai: "อ้วน", english: "fat" }, { thai: "แก่, สูงอายุ", english: "old" }, { thai: "เด็ก, ผู้เยาว์", english: "young" }, { thai: "ใหญ่", english: "big" }, { thai: "แม่", english: "mom" }, { thai: "พ่อ", english: "dad" }, { thai: "ย่า, ยาย", english: "grandma" }, { thai: "ปู่, ตา", english: "grandpa" }, { thai: "พี่ชาย, น้องชาย", english: "brother" }, { thai: "พี่สาว, น้องสาว", english: "sister" }, { thai: "อาผู้หญิง, ป้า", english: "aunt" }, { thai: "พี่น้อง", english: "sibling" }, { thai: "ลูกพี่ลูกน้อง", english: "cousin" }, { thai: "กระเป๋าสะพายหลัง", english: "backpack" }, { thai: "ปากกา", english: "pen" }, { thai: "เก้าอี้", english: "chair" }, { thai: "โต๊ะ", english: "desk" }, { thai: "ดินสอ", english: "pencil" }, { thai: "หนังสือ", english: "book" }],
-            // Level 2
-            [{ thai: "ไม้บรรทัด", english: "ruler" }, { thai: "ยางลบ", english: "eraser" }, { thai: "แผนที่", english: "map" }, { thai: "โต๊ะ", english: "table" }, { thai: "สถานที่", english: "place" }, { thai: "เกรด, คะแนน", english: "grade" }, { thai: "พูด, บรรยาย", english: "speak" }, { thai: "เขียน", english: "write" }, { thai: "สีเทียน", english: "crayon" }, { thai: "สมุด", english: "notebook" }, { thai: "โปสเตอร์, ป้ายประกาศ", english: "poster" }, { thai: "พูดคุย, สนทนา", english: "talk" }, { thai: "ฟัง", english: "listen" }, { thai: "ความคิด", english: "thought" }, { thai: "เรียนรู้, ศึกษา", english: "learn" }, { thai: "สาขา, วิชา", english: "subject" }, { thai: "ทาสี, ระบายสี", english: "paint" }, { thai: "ร้องเพลง", english: "sing" }, { thai: "ถาม, ขอ", english: "ask" }, { thai: "ชอล์ค", english: "chalk" }, { thai: "กระดาษ", english: "paper" }, { thai: "ปรบมือ", english: "clap" }, { thai: "เลี้ยว", english: "turn" }, { thai: "ตัวเลข", english: "number" }, { thai: "โรงงาน", english: "factory" }, { thai: "ร้านขายขนมปัง", english: "bakery" }, { thai: "เหรียญ", english: "coin" }, { thai: "โรงยิม", english: "gym" }, { thai: "คลีนิค", english: "clinic" }, { thai: "ร้านขายของ", english: "store" }],
-            // Level 3
-            [{ thai: "ดอกไม้", english: "flowers" }, { thai: "เมฆ", english: "clouds" }, { thai: "หญ้า", english: "grass" }, { thai: "ใบไม้", english: "leaf" }, { thai: "ยืนขึ้น", english: "stand up" }, { thai: "นั่ง", english: "sit" }, { thai: "วิ่ง", english: "run" }, { thai: "วาง", english: "put" }, { thai: "ชี้", english: "point" }, { thai: "จำ", english: "remember" }, { thai: "ทักทาย", english: "greet" }, { thai: "ค้นหา", english: "find" }, { thai: "ทบทวน", english: "review" }, { thai: "นับ", english: "count" }, { thai: "ไป", english: "go" }, { thai: "มอง, มองดู", english: "look" }, { thai: "เลียนแบบ, คัดลอก", english: "copy" }, { thai: "กระดาน", english: "board" }, { thai: "ปากกาเน้นข้อความ", english: "marker" }, { thai: "แก้ปัญหา", english: "solve" }, { thai: "ยกขึ้น", english: "raise" }, { thai: "หยิบ", english: "pick up" }, { thai: "สวนสาธารณะ", english: "park" }, { thai: "บ้าน", english: "house" }, { thai: "สนามเด็กเล่น", english: "playground" }, { thai: "ดวงอาทิตย์", english: "sun" }, { thai: "แสงอาทิตย์", english: "sunlight" }, { thai: "อากาศ", english: "air" }, { thai: "บริสุทธิ์, สะอาด, สดชื่น", english: "fresh" }, { thai: "ต้นไม้", english: "tree" }],
-            // Level 4
-            [{ thai: "ความสมดุล", english: "balance" }, { thai: "สิ่งสกปรก", english: "dirt" }, { thai: "ป้องกัน", english: "protect" }, { thai: "ดิน", english: "soil" }, { thai: "ขยะ", english: "garbage" }, { thai: "สะอาด", english: "clean" }, { thai: "พืช", english: "plant" }, { thai: "พลาสติก", english: "plastic" }, { thai: "ขวด", english: "bottle" }, { thai: "สำคัญ", english: "important" }, { thai: "ฝน", english: "rain" }, { thai: "หิมะ", english: "snow" }, { thai: "สวน", english: "garden" }, { thai: "ความร้อน, อุณหภูมิร้อน", english: "heat" }, { thai: "ร้อน", english: "hot" }, { thai: "อันตราย", english: "danger" }, { thai: "เติบโต", english: "grow" }, { thai: "ผิวหนัง", english: "skin" }, { thai: "สัตว์", english: "animal" }, { thai: "เเข็งแรง", english: "strong" }, { thai: "ลม", english: "wind" }, { thai: "ช่วยชีวิต, ปกป้อง, คุ้มครอง", english: "save" }, { thai: "ชายหาด", english: "beach" }, { thai: "เอาออก", english: "remove" }, { thai: "หยุด", english: "stop" }, { thai: "ผลไม้", english: "fruits" }, { thai: "โลก", english: "Earth" }, { thai: "ซึ่งทำที่บ้าน", english: "homemade" }, { thai: "หิว", english: "hungry" }, { thai: "แตงโม", english: "watermelon" }],
-            // Level 5
-            [{ thai: "ตัดเป็นแผ่นบางๆ", english: "slice" }, { thai: "ข้าว", english: "rice" }, { thai: "ขนมปัง", english: "bread" }, { thai: "เขย่า", english: "shake" }, { thai: "ไข่", english: "egg" }, { thai: "พิซซ่า", english: "pizza" }, { thai: "เค้ก", english: "cake" }, { thai: "สลัด", english: "salad" }, { thai: "ไก่", english: "chicken" }, { thai: "เนื้อวัว", english: "beef" }, { thai: "เนื้อหมู", english: "pork" }, { thai: "ปลา", english: "fish" }, { thai: "กล้วย", english: "banana" }, { thai: "ส้ม", english: "orange" }, { thai: "แอปเปิ้ล", english: "apple" }, { thai: "มะละกอ", english: "papaya" }, { thai: "สับปะรด", english: "pineapple" }, { thai: "สตอเบอรี่", english: "strawberry" }, { thai: "องุ่น", english: "grape" }, { thai: "สปาเก็ตตี้", english: "spaghetti" }, { thai: "ไอศกรีม", english: "ice cream" }, { thai: "คัพเค้ก", english: "cupcake" }, { thai: "คุกกี้", english: "cookie" }, { thai: "แซนวิช", english: "sandwich" }, { thai: "ผัก", english: "vegetable" }, { thai: "ล้าง", english: "wash" }, { thai: "มันฝรั่งทอด", english: "fries" }, { thai: "เบอเกอร์", english: "burger" }, { thai: "แพนเค้ก", english: "pancakes" }, { thai: "มันฝรั่ง", english: "potatoes" }],
-            // Level 6
-            [{ thai: "เกลือ", english: "salt" }, { thai: "ชีส", english: "cheese" }, { thai: "น้ำตาล", english: "sugar" }, { thai: "พาสต้า", english: "pasta" }, { thai: "ฮอทดอก", english: "hot dog" }, { thai: "มะเขือเทศ", english: "tomato" }, { thai: "แครอท", english: "carrot" }, { thai: "น้ำ", english: "water" }, { thai: "นม", english: "milk" }, { thai: "น้ำผลไม้", english: "juice" }, { thai: "น้ำอัดลม", english: "soda" }, { thai: "เครื่องดื่มปั่นผสมนม และไอศครีม", english: "milkshake" }, { thai: "กาแฟ", english: "coffee" }, { thai: "ชา", english: "tea" }, { thai: "เหล้าองุ่น, ไวน์", english: "wine" }, { thai: "กระหายน้ำ", english: "thirsty" }, { thai: "โค้ก", english: "cola" }, { thai: "เบียร์", english: "beer" }, { thai: "ชาเย็น", english: "ice tea" }, { thai: "กิน", english: "eat" }, { thai: "นอน", english: "sleep" }, { thai: "ดื่ม", english: "drink" }, { thai: "งีบ", english: "nap" }, { thai: "พักผ่อน", english: "rest" }, { thai: "อ่าน", english: "read" }, { thai: "ปรุงอาหาร", english: "cook" }, { thai: "เดิน", english: "walk" }, { thai: "ขับขาน, สวด, ท่อง", english: "chant" }, { thai: "กระโดดขาเดียว", english: "hop" }, { thai: "กระโดด", english: "jump" }],
-            // Level 7
-            [{ thai: "การปีนเขา", english: "mountaineering" }, { thai: "การพักแรม", english: "camping" }, { thai: "กีฬาโบว์ลิ่ง", english: "bowling" }, { thai: "การขี่ม้า", english: "riding" }, { thai: "กีฬาขี่จักรยาน", english: "cycling" }, { thai: "การพายเรือแคนู", english: "canoeing" }, { thai: "การเดินทางไกลด้วยเท้า", english: "hiking" }, { thai: "ออกกำลังกาย", english: "exercise" }, { thai: "กีฬาดำน้ำลึก", english: "diving" }, { thai: "ดู", english: "watch" }, { thai: "การเล่นกระดานโต้คลื่น", english: "surfing" }, { thai: "เล่น", english: "play" }, { thai: "การซื้อของ", english: "shopping" }, { thai: "ตกปลา", english: "fishing" }, { thai: "การว่ายน้ำ", english: "swimming" }, { thai: "การวิ่ง", english: "running" }, { thai: "การเล่นสกี", english: "skiing" }, { thai: "การแล่นเรือใบ", english: "sailing" }, { thai: "การร่องแพ,การล่องแก่ง", english: "rafting" }, { thai: "การพายเรือคายัค", english: "kayaking" }, { thai: "กีฬาสำรวจและปีนถ้ำ", english: "caving" }, { thai: "กีฬาหรือกิจกรรมเล่นสเก็ต", english: "skating" }, { thai: "กิจกรรมหรือกีฬาสโนว์บอร์ด", english: "snowboarding" }, { thai: "การเดินทางท่องเที่ยวโดยไม่มีการใช้ยานพาหนะส่วนตัวให้การขนสัมภาระ ไม่ว่าจะมีการค้างแรมหรือไม่ก็ตาม", english: "backpacking" }, { thai: "การล่าสัตว์", english: "hunting" }, { thai: "กีฬา", english: "sports" }, { thai: "งานศิลปะ", english: "art" }, { thai: "งานฝีมือ, หัตถกรรม", english: "craft" }, { thai: "งอ,โค้ง, ดัด", english: "bend" }, { thai: "เอื้อม", english: "reach" }],
-            // Level 8
-            [{ thai: "เข้ารูป, ทำให้พอดี", english: "fit" }, { thai: "ปีก", english: "wing" }, { thai: "สวนสัตว์", english: "zoo" }, { thai: "แช่", english: "soak" }, { thai: "ที่เป็นของตัวเอง", english: "own" }, { thai: "นิทาน", english: "tale" }, { thai: "สุก(ผลไม้), งอม", english: "ripe" }, { thai: "เสียง", english: "voice" }, { thai: "จุดสูงสุด", english: "top" }, { thai: "ที่เป็นที่นิยม", english: "pop" }, { thai: "คิด", english: "think" }, { thai: "ลงคะแนน", english: "vote" }, { thai: "ใช้", english: "use" }, { thai: "ไม้", english: "wood" }, { thai: "บ้าง, สิ่งใดสิ่งหนึ่ง", english: "any" }, { thai: "บาง", english: "thin" }, { thai: "ติดตั้ง, วาง, กำหนด", english: "set" }, { thai: "ซ่อม", english: "repair" }, { thai: "ลุง", english: "uncle" }, { thai: "ผ้าพันคอ", english: "scarf" }, { thai: "แถว", english: "row" }, { thai: "เท", english: "pour" }, { thai: "น่าเกลียด", english: "ugly" }, { thai: "เป็นรูปไข่,เป็นรูปรี", english: "oval" }, { thai: "เร็ว", english: "quick" }, { thai: "สัตว์เลี้ยง", english: "pet" }, { thai: "เงียบ", english: "quiet" }, { thai: "การแข่งขัน", english: "race" }, { thai: "ลำต้น", english: "stem" }, { thai: "ร้อยกรอง, กลอน", english: "verse" }],
-            // Level 9
-            [{ thai: "เป็นลอน", english: "wavy" }, { thai: "ป่วย", english: "sick" }, { thai: "หาว", english: "yawn" }, { thai: "ปลาย", english: "tip" }, { thai: "อารมณ์เสีย", english: "upset" }, { thai: "รางวัล", english: "prize" }, { thai: "วัน", english: "day" }, { thai: "ซึ่งอยู่ในป่า", english: "wild" }, { thai: "จุด", english: "dot" }, { thai: "โยเกิร์ต", english: "yogurt" }, { thai: "ฤดูหนาว", english: "winter" }, { thai: "เร็ว", english: "fast" }, { thai: "รู้สึก", english: "feel" }, { thai: "ขว้าง", english: "pitch" }, { thai: "หลังคา", english: "roof" }, { thai: "หน้า", english: "page" }, { thai: "ตีก้นลงโทษ", english: "spank" }, { thai: "การกระทำ", english: "action" }, { thai: "ตั้งเป้าหมาย", english: "aim" }, { thai: "คำตอบ", english: "answer" }, { thai: "ไม่ดี", english: "bad" }, { thai: "ธนาคาร", english: "bank" }, { thai: "ผึ้ง", english: "bee" }, { thai: "ร่างกาย", english: "body" }, { thai: "หมวก", english: "cap" }, { thai: "รถยนต์", english: "car" }, { thai: "ฝาปิด", english: "cover" }, { thai: "ตาย", english: "die" }, { thai: "อาหารค่ำ", english: "dinner" }, { thai: "เพลิดเพลิน", english: "enjoy" }],
-            // Level 10
-            [{ thai: "ไกล", english: "far" }, { thai: "ทำให้ชัดเจน", english: "clear" }, { thai: "เด็กผู้หญิง", english: "girl" }, { thai: "ให้", english: "give" }, { thai: "ได้ยิน", english: "hear" }, { thai: "เจ้าภาพ,เจ้าบ้าน", english: "host" }, { thai: "เเมลง", english: "insects" }, { thai: "ว่าว", english: "kite" }, { thai: "เด็ก", english: "kid" }, { thai: "ขา", english: "leg" }, { thai: "สิงโต", english: "lion" }, { thai: "รอยแผลเป็น", english: "mark" }, { thai: "เสื่อ,ที่รอง", english: "mat" }, { thai: "ใหม่", english: "new" }, { thai: "เปิด", english: "open" }, { thai: "ผ่าน", english: "pass" }, { thai: "ความสงบเรียบร้อย", english: "peace" }, { thai: "สีแดง", english: "red" }, { thai: "รวย", english: "rich" }, { thai: "หน่วย", english: "unit" }, { thai: "น่ากลัว", english: "scary" }, { thai: "เมล็ด", english: "seed" }, { thai: "ด้านข้าง", english: "side" }, { thai: "ทั้งหมด", english: "all" }, { thai: "ข้อสอบ", english: "test" }, { thai: "เล็กมาก", english: "tiny" }, { thai: "ขึ้น", english: "up" }, { thai: "ไวโอลิน", english: "violin" }, { thai: "ผนัง", english: "wall" }, { thai: "ต้องการ", english: "want" }, { thai: "ข้างใน", english: "inside" }]
-        ];
+    <script>
+        // ข้อมูลคำศัพท์ที่ถูกแบ่งเป็น 10 เลเวล (30 คำ/เลเวล)
+        const allWords = [
+            // Level 1
+            [{ thai: "ตนเอง", english: "self" }, { thai: "สูง", english: "tall" }, { thai: "เตี้ย", english: "short" }, { thai: "คล้ำ, เข้ม (สี), มืด", english: "dark" }, { thai: "สว่าง, อ่อน(สี)", english: "light" }, { thai: "ฉลาด", english: "smart" }, { thai: "มีความสุข", english: "happy" }, { thai: "เสียใจ", english: "sad" }, { thai: "น่ารัก, สวย", english: "pretty" }, { thai: "ทั่วๆไป, โดยปกติ", english: "average" }, { thai: "สงบเงียบ", english: "calm" }, { thai: "อ้วน", english: "fat" }, { thai: "แก่, สูงอายุ", english: "old" }, { thai: "เด็ก, ผู้เยาว์", english: "young" }, { thai: "ใหญ่", english: "big" }, { thai: "แม่", english: "mom" }, { thai: "พ่อ", english: "dad" }, { thai: "ย่า, ยาย", english: "grandma" }, { thai: "ปู่, ตา", english: "grandpa" }, { thai: "พี่ชาย, น้องชาย", english: "brother" }, { thai: "พี่สาว, น้องสาว", english: "sister" }, { thai: "อาผู้หญิง, ป้า", english: "aunt" }, { thai: "พี่น้อง", english: "sibling" }, { thai: "ลูกพี่ลูกน้อง", english: "cousin" }, { thai: "กระเป๋าสะพายหลัง", english: "backpack" }, { thai: "ปากกา", english: "pen" }, { thai: "เก้าอี้", english: "chair" }, { thai: "โต๊ะ", english: "desk" }, { thai: "ดินสอ", english: "pencil" }, { thai: "หนังสือ", english: "book" }],
+            // Level 2
+            [{ thai: "ไม้บรรทัด", english: "ruler" }, { thai: "ยางลบ", english: "eraser" }, { thai: "แผนที่", english: "map" }, { thai: "โต๊ะ", english: "table" }, { thai: "สถานที่", english: "place" }, { thai: "เกรด, คะแนน", english: "grade" }, { thai: "พูด, บรรยาย", english: "speak" }, { thai: "เขียน", english: "write" }, { thai: "สีเทียน", english: "crayon" }, { thai: "สมุด", english: "notebook" }, { thai: "โปสเตอร์, ป้ายประกาศ", english: "poster" }, { thai: "พูดคุย, สนทนา", english: "talk" }, { thai: "ฟัง", english: "listen" }, { thai: "ความคิด", english: "thought" }, { thai: "เรียนรู้, ศึกษา", english: "learn" }, { thai: "สาขา, วิชา", english: "subject" }, { thai: "ทาสี, ระบายสี", english: "paint" }, { thai: "ร้องเพลง", english: "sing" }, { thai: "ถาม, ขอ", english: "ask" }, { thai: "ชอล์ค", english: "chalk" }, { thai: "กระดาษ", english: "paper" }, { thai: "ปรบมือ", english: "clap" }, { thai: "เลี้ยว", english: "turn" }, { thai: "ตัวเลข", english: "number" }, { thai: "โรงงาน", english: "factory" }, { thai: "ร้านขายขนมปัง", english: "bakery" }, { thai: "เหรียญ", english: "coin" }, { thai: "โรงยิม", english: "gym" }, { thai: "คลีนิค", english: "clinic" }, { thai: "ร้านขายของ", english: "store" }],
+            // Level 3
+            [{ thai: "ดอกไม้", english: "flowers" }, { thai: "เมฆ", english: "clouds" }, { thai: "หญ้า", english: "grass" }, { thai: "ใบไม้", english: "leaf" }, { thai: "ยืนขึ้น", english: "stand up" }, { thai: "นั่ง", english: "sit" }, { thai: "วิ่ง", english: "run" }, { thai: "วาง", english: "put" }, { thai: "ชี้", english: "point" }, { thai: "จำ", english: "remember" }, { thai: "ทักทาย", english: "greet" }, { thai: "ค้นหา", english: "find" }, { thai: "ทบทวน", english: "review" }, { thai: "นับ", english: "count" }, { thai: "ไป", english: "go" }, { thai: "มอง, มองดู", english: "look" }, { thai: "เลียนแบบ, คัดลอก", english: "copy" }, { thai: "กระดาน", english: "board" }, { thai: "ปากกาเน้นข้อความ", english: "marker" }, { thai: "แก้ปัญหา", english: "solve" }, { thai: "ยกขึ้น", english: "raise" }, { thai: "หยิบ", english: "pick up" }, { thai: "สวนสาธารณะ", english: "park" }, { thai: "บ้าน", english: "house" }, { thai: "สนามเด็กเล่น", english: "playground" }, { thai: "ดวงอาทิตย์", english: "sun" }, { thai: "แสงอาทิตย์", english: "sunlight" }, { thai: "อากาศ", english: "air" }, { thai: "บริสุทธิ์, สะอาด, สดชื่น", english: "fresh" }, { thai: "ต้นไม้", english: "tree" }],
+            // Level 4
+            [{ thai: "ความสมดุล", english: "balance" }, { thai: "สิ่งสกปรก", english: "dirt" }, { thai: "ป้องกัน", english: "protect" }, { thai: "ดิน", english: "soil" }, { thai: "ขยะ", english: "garbage" }, { thai: "สะอาด", english: "clean" }, { thai: "พืช", english: "plant" }, { thai: "พลาสติก", english: "plastic" }, { thai: "ขวด", english: "bottle" }, { thai: "สำคัญ", english: "important" }, { thai: "ฝน", english: "rain" }, { thai: "หิมะ", english: "snow" }, { thai: "สวน", english: "garden" }, { thai: "ความร้อน, อุณหภูมิร้อน", english: "heat" }, { thai: "ร้อน", english: "hot" }, { thai: "อันตราย", english: "danger" }, { thai: "เติบโต", english: "grow" }, { thai: "ผิวหนัง", english: "skin" }, { thai: "สัตว์", english: "animal" }, { thai: "เเข็งแรง", english: "strong" }, { thai: "ลม", english: "wind" }, { thai: "ช่วยชีวิต, ปกป้อง, คุ้มครอง", english: "save" }, { thai: "ชายหาด", english: "beach" }, { thai: "เอาออก", english: "remove" }, { thai: "หยุด", english: "stop" }, { thai: "ผลไม้", english: "fruits" }, { thai: "โลก", english: "Earth" }, { thai: "ซึ่งทำที่บ้าน", english: "homemade" }, { thai: "หิว", english: "hungry" }, { thai: "แตงโม", english: "watermelon" }],
+            // Level 5
+            [{ thai: "ตัดเป็นแผ่นบางๆ", english: "slice" }, { thai: "ข้าว", english: "rice" }, { thai: "ขนมปัง", english: "bread" }, { thai: "เขย่า", english: "shake" }, { thai: "ไข่", english: "egg" }, { thai: "พิซซ่า", english: "pizza" }, { thai: "เค้ก", english: "cake" }, { thai: "สลัด", english: "salad" }, { thai: "ไก่", english: "chicken" }, { thai: "เนื้อวัว", english: "beef" }, { thai: "เนื้อหมู", english: "pork" }, { thai: "ปลา", english: "fish" }, { thai: "กล้วย", english: "banana" }, { thai: "ส้ม", english: "orange" }, { thai: "แอปเปิ้ล", english: "apple" }, { thai: "มะละกอ", english: "papaya" }, { thai: "สับปะรด", english: "pineapple" }, { thai: "สตอเบอรี่", english: "strawberry" }, { thai: "องุ่น", english: "grape" }, { thai: "สปาเก็ตตี้", english: "spaghetti" }, { thai: "ไอศกรีม", english: "ice cream" }, { thai: "คัพเค้ก", english: "cupcake" }, { thai: "คุกกี้", english: "cookie" }, { thai: "แซนวิช", english: "sandwich" }, { thai: "ผัก", english: "vegetable" }, { thai: "ล้าง", english: "wash" }, { thai: "มันฝรั่งทอด", english: "fries" }, { thai: "เบอเกอร์", english: "burger" }, { thai: "แพนเค้ก", english: "pancakes" }, { thai: "มันฝรั่ง", english: "potatoes" }],
+            // Level 6
+            [{ thai: "เกลือ", english: "salt" }, { thai: "ชีส", english: "cheese" }, { thai: "น้ำตาล", english: "sugar" }, { thai: "พาสต้า", english: "pasta" }, { thai: "ฮอทดอก", english: "hot dog" }, { thai: "มะเขือเทศ", english: "tomato" }, { thai: "แครอท", english: "carrot" }, { thai: "น้ำ", english: "water" }, { thai: "นม", english: "milk" }, { thai: "น้ำผลไม้", english: "juice" }, { thai: "น้ำอัดลม", english: "soda" }, { thai: "เครื่องดื่มปั่นผสมนม และไอศครีม", english: "milkshake" }, { thai: "กาแฟ", english: "coffee" }, { thai: "ชา", english: "tea" }, { thai: "เหล้าองุ่น, ไวน์", english: "wine" }, { thai: "กระหายน้ำ", english: "thirsty" }, { thai: "โค้ก", english: "cola" }, { thai: "เบียร์", english: "beer" }, { thai: "ชาเย็น", english: "ice tea" }, { thai: "กิน", english: "eat" }, { thai: "นอน", english: "sleep" }, { thai: "ดื่ม", english: "drink" }, { thai: "งีบ", english: "nap" }, { thai: "พักผ่อน", english: "rest" }, { thai: "อ่าน", english: "read" }, { thai: "ปรุงอาหาร", english: "cook" }, { thai: "เดิน", english: "walk" }, { thai: "ขับขาน, สวด, ท่อง", english: "chant" }, { thai: "กระโดดขาเดียว", english: "hop" }, { thai: "กระโดด", english: "jump" }],
+            // Level 7
+            [{ thai: "การปีนเขา", english: "mountaineering" }, { thai: "การพักแรม", english: "camping" }, { thai: "กีฬาโบว์ลิ่ง", english: "bowling" }, { thai: "การขี่ม้า", english: "riding" }, { thai: "กีฬาขี่จักรยาน", english: "cycling" }, { thai: "การพายเรือแคนู", english: "canoeing" }, { thai: "การเดินทางไกลด้วยเท้า", english: "hiking" }, { thai: "ออกกำลังกาย", english: "exercise" }, { thai: "กีฬาดำน้ำลึก", english: "diving" }, { thai: "ดู", english: "watch" }, { thai: "การเล่นกระดานโต้คลื่น", english: "surfing" }, { thai: "เล่น", english: "play" }, { thai: "การซื้อของ", english: "shopping" }, { thai: "ตกปลา", english: "fishing" }, { thai: "การว่ายน้ำ", english: "swimming" }, { thai: "การวิ่ง", english: "running" }, { thai: "การเล่นสกี", english: "skiing" }, { thai: "การแล่นเรือใบ", english: "sailing" }, { thai: "การร่องแพ,การล่องแก่ง", english: "rafting" }, { thai: "การพายเรือคายัค", english: "kayaking" }, { thai: "กีฬาสำรวจและปีนถ้ำ", english: "caving" }, { thai: "กีฬาหรือกิจกรรมเล่นสเก็ต", english: "skating" }, { thai: "กิจกรรมหรือกีฬาสโนว์บอร์ด", english: "snowboarding" }, { thai: "การเดินทางท่องเที่ยวโดยไม่มีการใช้ยานพาหนะส่วนตัวให้การขนสัมภาระ ไม่ว่าจะมีการค้างแรมหรือไม่ก็ตาม", english: "backpacking" }, { thai: "การล่าสัตว์", english: "hunting" }, { thai: "กีฬา", english: "sports" }, { thai: "งานศิลปะ", english: "art" }, { thai: "งานฝีมือ, หัตถกรรม", english: "craft" }, { thai: "งอ,โค้ง, ดัด", english: "bend" }, { thai: "เอื้อม", english: "reach" }],
+            // Level 8
+            [{ thai: "เข้ารูป, ทำให้พอดี", english: "fit" }, { thai: "ปีก", english: "wing" }, { thai: "สวนสัตว์", english: "zoo" }, { thai: "แช่", english: "soak" }, { thai: "ที่เป็นของตัวเอง", english: "own" }, { thai: "นิทาน", english: "tale" }, { thai: "สุก(ผลไม้), งอม", english: "ripe" }, { thai: "เสียง", english: "voice" }, { thai: "จุดสูงสุด", english: "top" }, { thai: "ที่เป็นที่นิยม", english: "pop" }, { thai: "คิด", english: "think" }, { thai: "ลงคะแนน", english: "vote" }, { thai: "ใช้", english: "use" }, { thai: "ไม้", english: "wood" }, { thai: "บ้าง, สิ่งใดสิ่งหนึ่ง", english: "any" }, { thai: "บาง", english: "thin" }, { thai: "ติดตั้ง, วาง, กำหนด", english: "set" }, { thai: "ซ่อม", english: "repair" }, { thai: "ลุง", english: "uncle" }, { thai: "ผ้าพันคอ", english: "scarf" }, { thai: "แถว", english: "row" }, { thai: "เท", english: "pour" }, { thai: "น่าเกลียด", english: "ugly" }, { thai: "เป็นรูปไข่,เป็นรูปรี", english: "oval" }, { thai: "เร็ว", english: "quick" }, { thai: "สัตว์เลี้ยง", english: "pet" }, { thai: "เงียบ", english: "quiet" }, { thai: "การแข่งขัน", english: "race" }, { thai: "ลำต้น", english: "stem" }, { thai: "ร้อยกรอง, กลอน", english: "verse" }],
+            // Level 9
+            [{ thai: "เป็นลอน", english: "wavy" }, { thai: "ป่วย", english: "sick" }, { thai: "หาว", english: "yawn" }, { thai: "ปลาย", english: "tip" }, { thai: "อารมณ์เสีย", english: "upset" }, { thai: "รางวัล", english: "prize" }, { thai: "วัน", english: "day" }, { thai: "ซึ่งอยู่ในป่า", english: "wild" }, { thai: "จุด", english: "dot" }, { thai: "โยเกิร์ต", english: "yogurt" }, { thai: "ฤดูหนาว", english: "winter" }, { thai: "เร็ว", english: "fast" }, { thai: "รู้สึก", english: "feel" }, { thai: "ขว้าง", english: "pitch" }, { thai: "หลังคา", english: "roof" }, { thai: "หน้า", english: "page" }, { thai: "ตีก้นลงโทษ", english: "spank" }, { thai: "การกระทำ", english: "action" }, { thai: "ตั้งเป้าหมาย", english: "aim" }, { thai: "คำตอบ", english: "answer" }, { thai: "ไม่ดี", english: "bad" }, { thai: "ธนาคาร", english: "bank" }, { thai: "ผึ้ง", english: "bee" }, { thai: "ร่างกาย", english: "body" }, { thai: "หมวก", english: "cap" }, { thai: "รถยนต์", english: "car" }, { thai: "ฝาปิด", english: "cover" }, { thai: "ตาย", english: "die" }, { thai: "อาหารค่ำ", english: "dinner" }, { thai: "เพลิดเพลิน", english: "enjoy" }],
+            // Level 10
+            [{ thai: "ไกล", english: "far" }, { thai: "ทำให้ชัดเจน", english: "clear" }, { thai: "เด็กผู้หญิง", english: "girl" }, { thai: "ให้", english: "give" }, { thai: "ได้ยิน", english: "hear" }, { thai: "เจ้าภาพ,เจ้าบ้าน", english: "host" }, { thai: "เเมลง", english: "insects" }, { thai: "ว่าว", english: "kite" }, { thai: "เด็ก", english: "kid" }, { thai: "ขา", english: "leg" }, { thai: "สิงโต", english: "lion" }, { thai: "รอยแผลเป็น", english: "mark" }, { thai: "เสื่อ,ที่รอง", english: "mat" }, { thai: "ใหม่", english: "new" }, { thai: "เปิด", english: "open" }, { thai: "ผ่าน", english: "pass" }, { thai: "ความสงบเรียบร้อย", english: "peace" }, { thai: "สีแดง", english: "red" }, { thai: "รวย", english: "rich" }, { thai: "หน่วย", english: "unit" }, { thai: "น่ากลัว", english: "scary" }, { thai: "เมล็ด", english: "seed" }, { thai: "ด้านข้าง", english: "side" }, { thai: "ทั้งหมด", english: "all" }, { thai: "ข้อสอบ", english: "test" }, { thai: "เล็กมาก", english: "tiny" }, { thai: "ขึ้น", english: "up" }, { thai: "ไวโอลิน", english: "violin" }, { thai: "ผนัง", english: "wall" }, { thai: "ต้องการ", english: "want" }, { thai: "ข้างใน", english: "inside" }]
+        ];
 
-        // กำหนดค่าการเชื่อมต่อ Firebase ที่นี่
-        const firebaseConfig = {
-            databaseURL: "https://my-word-game-leaderboard-default-rtdb.asia-southeast1.firebasedatabase.app/",
-        };
-        firebase.initializeApp(firebaseConfig);
-        const database = firebase.database();
-        const leaderboardRef = database.ref('leaderboard');
-        const playersRef = database.ref('players');
+        // กำหนดค่าการเชื่อมต่อ Firebase ที่นี่
+        const firebaseConfig = {
+            // คัดลอกค่า config จากโปรเจกต์ Firebase ของคุณมาวางที่นี่
+            apiKey: "YOUR_API_KEY",
+            authDomain: "YOUR_AUTH_DOMAIN",
+            databaseURL: "https://your-database-name.asia-southeast1.firebasedatabase.app",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_STORAGE_BUCKET",
+            messagingSenderId: "YOUR_MESSAGING_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const database = firebase.database();
+        const leaderboardRef = database.ref('leaderboard');
+        const playersRef = database.ref('players');
 
-        // สร้าง Audio Context สำหรับเสียง
-        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
-        function playSound(isCorrect) {
-            const oscillator = audioContext.createOscillator();
-            const gainNode = audioContext.createGain();
-            oscillator.connect(gainNode);
-            gainNode.connect(audioContext.destination);
-            if (isCorrect) {
-                oscillator.type = 'sine';
-                oscillator.frequency.value = 880;
-                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-            } else {
-                oscillator.type = 'square';
-                oscillator.frequency.value = 220;
-                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
-                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
-            }
-            oscillator.start();
-            oscillator.stop(audioContext.currentTime + 0.3);
-        }
+        // สร้าง Audio Context สำหรับเสียง
+        const audioContext = new (window.AudioContext || window.webkitAudioContext)();
+        function playSound(isCorrect) {
+            const oscillator = audioContext.createOscillator();
+            const gainNode = audioContext.createGain();
+            oscillator.connect(gainNode);
+            gainNode.connect(audioContext.destination);
+            if (isCorrect) {
+                oscillator.type = 'sine';
+                oscillator.frequency.value = 880;
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            } else {
+                oscillator.type = 'square';
+                oscillator.frequency.value = 220;
+                gainNode.gain.setValueAtTime(0.5, audioContext.currentTime);
+                gainNode.gain.exponentialRampToValueAtTime(0.001, audioContext.currentTime + 0.3);
+            }
+            oscillator.start();
+            oscillator.stop(audioContext.currentTime + 0.3);
+        }
 
-        let currentLevel = 0;
-        let score = 0;
-        let timerInterval;
-        const timeLimit = 10;
-        let timeLeft = timeLimit;
-        let currentQuestionIndex = 0;
-        let currentWords = [];
-        let totalTime = 0;
-        let isPaused = false;
+        let currentLevel = 0;
+        let score = 0;
+        let timerInterval;
+        const timeLimit = 10;
+        let timeLeft = timeLimit;
+        let currentQuestionIndex = 0;
+        let currentWords = [];
+        let totalTime = 0;
+        let isPaused = false;
+        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer')) || null;
 
-        const startScreen = document.getElementById('start-screen');
-        const nameInputScreen = document.getElementById('name-input-screen');
-        const loginScreen = document.getElementById('login-screen');
-        const levelSelectScreen = document.getElementById('level-select-screen');
-        const gameArea = document.getElementById('game-area');
-        const resultScreen = document.getElementById('result-screen');
-        const startButton = document.getElementById('start-button');
-        const resumeLastGameButton = document.getElementById('resume-last-game-button');
-        const levelGrid = document.getElementById('level-grid');
-        const questionElement = document.getElementById('question');
-        const optionsContainer = document.getElementById('options-container');
-        const scoreElement = document.getElementById('score');
-        const countdownElement = document.getElementById('countdown');
-        const finalScoreElement = document.getElementById('final-score');
-        const levelDisplay = document.getElementById('level-display');
-        const resultMessage = document.getElementById('result-message');
-        const continueButton = document.getElementById('continue-button');
-        const restartButton = document.getElementById('restart-button');
-        const pauseButton = document.getElementById('pause-button');
-        const resumeButton = document.getElementById('resume-button');
-        const homeButton = document.getElementById('home-button');
-        const levelSelectButton = document.getElementById('level-select-button');
-        const nameInput = document.getElementById('name-input');
-        const submitNameButton = document.getElementById('submit-name-button');
-        const loginNameInput = document.getElementById('login-name-input');
-        const loginButton = document.getElementById('login-button');
-        const leaderboardBody = document.getElementById('leaderboard-body');
-        const goToLoginButton = document.getElementById('go-to-login-button');
-        const goToSignupButton = document.getElementById('go-to-signup-button');
-        const goToHomeFromLevelSelectButton = document.getElementById('go-to-home-from-level-select');
-        
-        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer')) || null;
+        const startScreen = document.getElementById('start-screen');
+        const nameInputScreen = document.getElementById('name-input-screen');
+        const loginScreen = document.getElementById('login-screen');
+        const levelSelectScreen = document.getElementById('level-select-screen');
+        const gameArea = document.getElementById('game-area');
+        const resultScreen = document.getElementById('result-screen');
+        const startButton = document.getElementById('start-button');
+        const resumeLastGameButton = document.getElementById('resume-last-game-button');
+        const levelGrid = document.getElementById('level-grid');
+        const questionElement = document.getElementById('question');
+        const optionsContainer = document.getElementById('options-container');
+        const scoreElement = document.getElementById('score');
+        const countdownElement = document.getElementById('countdown');
+        const finalScoreElement = document.getElementById('final-score');
+        const levelDisplay = document.getElementById('level-display');
+        const resultMessage = document.getElementById('result-message');
+        const continueButton = document.getElementById('continue-button');
+        const restartButton = document.getElementById('restart-button');
+        const pauseButton = document.getElementById('pause-button');
+        const resumeButton = document.getElementById('resume-button');
+        const homeButton = document.getElementById('home-button');
+        const levelSelectButton = document.getElementById('level-select-button');
+        const nameInput = document.getElementById('name-input');
+        const submitNameButton = document.getElementById('submit-name-button');
+        const loginNameInput = document.getElementById('login-name-input');
+        const loginButton = document.getElementById('login-button');
+        const leaderboardBody = document.getElementById('leaderboard-body');
+        const goToLoginButton = document.getElementById('go-to-login-button');
+        const goToSignupButton = document.getElementById('go-to-signup-button');
+        const goToHomeFromLevelSelectButton = document.getElementById('go-to-home-from-level-select');
 
-        function savePlayerState() {
-            if (currentPlayer) {
-                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
-            }
-        }
+        function savePlayerState() {
+            if (currentPlayer) {
+                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+            }
+        }
 
-        function clearPlayerState() {
-            localStorage.removeItem('currentPlayer');
-            currentPlayer = null;
-        }
+        function clearPlayerState() {
+            localStorage.removeItem('currentPlayer');
+            currentPlayer = null;
+        }
 
-        function getFakeOptions(correctAnswer) {
-            const fakeOptions = [];
-            const allEnglishWords = allWords.flat().map(w => w.english);
-            while (fakeOptions.length < 3) {
-                const randomWord = allEnglishWords[Math.floor(Math.random() * allEnglishWords.length)];
-                if (randomWord !== correctAnswer.english && !fakeOptions.includes(randomWord)) {
-                    fakeOptions.push(randomWord);
-                }
-            }
-            return fakeOptions;
-        }
+        function showScreen(screen) {
+            [startScreen, nameInputScreen, loginScreen, levelSelectScreen, gameArea, resultScreen].forEach(s => s.style.display = 'none');
+            screen.style.display = 'block';
+        }
 
-        function startTimer() {
-            if (isPaused) return;
-            timeLeft = 10;
-            countdownElement.textContent = timeLeft;
-            timerInterval = setInterval(() => {
-                if (isPaused) {
-                    clearInterval(timerInterval);
-                    return;
-                }
-                timeLeft--;
-                countdownElement.textContent = Math.max(0, timeLeft);
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    totalTime += 10;
-                    handleAnswer(null, currentWords[currentQuestionIndex - 1].english);
-                }
-            }, 1000);
-        }
-        
-        function showNewQuestion() {
-            clearInterval(timerInterval);
-            if (currentQuestionIndex >= currentWords.length) {
-                endLevel();
-                return;
-            }
+        function renderLeaderboard(data) {
+            leaderboardBody.innerHTML = '';
+            if (!data) return;
 
-            const currentQuestion = currentWords[currentQuestionIndex];
-            const correctAnswer = currentQuestion.english;
-            const fakeOptions = getFakeOptions(currentQuestion);
-            const allOptions = [correctAnswer, ...fakeOptions];
-            allOptions.sort(() => Math.random() - 0.5);
+            const scores = [];
+            for (const key in data) {
+                scores.push({
+                    ...data[key],
+                    id: key
+                });
+            }
+            scores.sort((a, b) => {
+                if (b.score !== a.score) {
+                    return b.score - a.score;
+                }
+                return a.total_time - b.total_time;
+            });
+            scores.slice(0, 10).forEach((item, index) => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${index + 1}</td>
+                    <td>${item.name}</td>
+                    <td>${item.level}</td>
+                    <td>${item.score}</td>
+                    <td>${item.total_time} วินาที</td>
+                `;
+                leaderboardBody.appendChild(row);
+            });
+        }
 
-            questionElement.textContent = currentQuestion.thai;
-            optionsContainer.innerHTML = '';
+        function loadLeaderboard() {
+            leaderboardRef.orderByChild('score').limitToLast(10).on('value', (snapshot) => {
+                const data = snapshot.val();
+                renderLeaderboard(data);
+            });
+        }
 
-            allOptions.forEach(option => {
-                const button = document.createElement('button');
-                button.classList.add('option-button');
-                button.textContent = option;
-                button.addEventListener('click', () => handleAnswer(option, correctAnswer));
-                optionsContainer.appendChild(button);
-            });
+        function createLevelButtons() {
+            levelGrid.innerHTML = '';
+            for (let i = 0; i < allWords.length; i++) {
+                const levelButton = document.createElement('button');
+                levelButton.classList.add('level-button');
+                levelButton.textContent = `เลเวล ${i + 1}`;
+                if (i + 1 > currentPlayer.unlockedLevels) {
+                    levelButton.classList.add('locked');
+                } else {
+                    levelButton.addEventListener('click', () => {
+                        startGame(i + 1);
+                    });
+                }
+                levelGrid.appendChild(levelButton);
+            }
+        }
+        
+        function getFakeOptions(correctAnswer) {
+            const fakeOptions = [];
+            const allEnglishWords = allWords.flat().map(w => w.english);
+            while (fakeOptions.length < 3) {
+                const randomWord = allEnglishWords[Math.floor(Math.random() * allEnglishWords.length)];
+                if (randomWord !== correctAnswer.english && !fakeOptions.includes(randomWord)) {
+                    fakeOptions.push(randomWord);
+                }
+            }
+            return fakeOptions;
+        }
 
-            startTimer();
-            currentQuestionIndex++;
-        }
+        function startTimer() {
+            if (isPaused) return;
+            timeLeft = 10;
+            countdownElement.textContent = timeLeft;
+            timerInterval = setInterval(() => {
+                if (isPaused) {
+                    clearInterval(timerInterval);
+                    return;
+                }
+                timeLeft--;
+                countdownElement.textContent = Math.max(0, timeLeft);
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    totalTime += 10;
+                    handleAnswer(null, currentWords[currentQuestionIndex - 1].english);
+                }
+            }, 1000);
+        }
+        
+        function showNewQuestion() {
+            clearInterval(timerInterval);
+            if (currentQuestionIndex >= currentWords.length) {
+                endLevel();
+                return;
+            }
 
-        function handleAnswer(selectedOption, correctAnswer) {
-            clearInterval(timerInterval);
-            const allButtons = document.querySelectorAll('.option-button');
-            allButtons.forEach(button => button.disabled = true);
-            
-            const timeTaken = timeLimit - Math.max(0, timeLeft);
-            totalTime += timeTaken;
+            const currentQuestion = currentWords[currentQuestionIndex];
+            const correctAnswer = currentQuestion.english;
+            const fakeOptions = getFakeOptions(currentQuestion);
+            const allOptions = [correctAnswer, ...fakeOptions];
+            allOptions.sort(() => Math.random() - 0.5);
 
-            if (selectedOption === correctAnswer) {
-                score++;
-                playSound(true);
-                const correctButton = Array.from(allButtons).find(btn => btn.textContent === selectedOption);
-                correctButton.classList.add('correct');
-            } else {
-                playSound(false);
-                if (selectedOption) {
-                    const selectedButton = Array.from(allButtons).find(btn => btn.textContent === selectedOption);
-                    selectedButton.classList.add('wrong');
-                }
-                const correctButton = Array.from(allButtons).find(btn => btn.textContent === correctAnswer);
-                correctButton.classList.add('correct');
-            }
+            questionElement.textContent = currentQuestion.thai;
+            optionsContainer.innerHTML = '';
 
-            scoreElement.textContent = `คะแนน: ${score}`;
-            
-            currentPlayer.level = currentLevel;
-            currentPlayer.score = score;
-            currentPlayer.questionIndex = currentQuestionIndex;
-            currentPlayer.totalTime = totalTime;
-            savePlayerState();
+            allOptions.forEach(option => {
+                const button = document.createElement('button');
+                button.classList.add('option-button');
+                button.textContent = option;
+                button.addEventListener('click', () => handleAnswer(option, correctAnswer));
+                optionsContainer.appendChild(button);
+            });
 
-            setTimeout(() => {
-                showNewQuestion();
-            }, 1000);
-        }
+            startTimer();
+            currentQuestionIndex++;
+        }
 
-        async function endLevel() {
-            gameArea.style.display = 'none';
-            resultScreen.style.display = 'block';
-            finalScoreElement.textContent = `${score} / 30`;
+        function handleAnswer(selectedOption, correctAnswer) {
+            clearInterval(timerInterval);
+            const allButtons = document.querySelectorAll('.option-button');
+            allButtons.forEach(button => button.disabled = true);
+            
+            const timeTaken = timeLimit - Math.max(0, timeLeft);
+            totalTime += timeTaken;
 
-            const isPerfectScore = score === 30;
-            const playerRecord = {
-                name: currentPlayer.name,
-                level: currentLevel,
-                score: score,
-                total_time: totalTime
-            };
-            
-            await saveScoreToFirebase(playerRecord);
-            
-            if (isPerfectScore) {
-                resultMessage.textContent = 'ยอดเยี่ยมมาก! คุณทำคะแนนเต็ม!';
-                if (currentLevel < allWords.length) {
-                    currentPlayer.unlockedLevels = Math.max(currentPlayer.unlockedLevels, currentLevel + 1);
-                    await playersRef.child(currentPlayer.name).update({ unlockedLevels: currentPlayer.unlockedLevels });
-                    savePlayerState();
-                    continueButton.style.display = 'inline-block';
-                    continueButton.onclick = () => startLevel(currentLevel + 1);
-                } else {
-                    resultMessage.textContent = 'คุณทำคะแนนเต็มในเลเวลสุดท้ายแล้ว!';
-                    continueButton.style.display = 'none';
-                }
-            } else {
-                resultMessage.textContent = `คะแนนยังไม่เต็ม ลองใหม่อีกครั้งนะ!`;
-                continueButton.style.display = 'none';
-            }
-            
-            clearPlayerState();
-        }
-        
-        async function saveScoreToFirebase(record) {
-            const newScoreRef = leaderboardRef.push();
-            await newScoreRef.set(record);
-        }
+            if (selectedOption === correctAnswer) {
+                score++;
+                playSound(true);
+                const correctButton = Array.from(allButtons).find(btn => btn.textContent === selectedOption);
+                correctButton.classList.add('correct');
+            } else {
+                playSound(false);
+                if (selectedOption) {
+                    const selectedButton = Array.from(allButtons).find(btn => btn.textContent === selectedOption);
+                    selectedButton.classList.add('wrong');
+                }
+                const correctButton = Array.from(allButtons).find(btn => btn.textContent === correctAnswer);
+                correctButton.classList.add('correct');
+            }
 
-        function displayLeaderboard() {
-            leaderboardRef.on('value', (snapshot) => {
-                const data = snapshot.val();
-                const leaderboardBody = document.getElementById('leaderboard-body');
-                leaderboardBody.innerHTML = '';
-                
-                if (data) {
-                    const sortedData = Object.values(data).sort((a, b) => {
-                        // Priority 1: Level (Descending)
-                        if (b.level !== a.level) {
-                            return b.level - a.level;
-                        }
-                        // Priority 2: Score (Descending)
-                        if (b.score !== a.score) {
-                            return b.score - a.score;
-                        }
-                        // Priority 3: Time (Ascending)
-                        return a.total_time - b.total_time;
-                    }).slice(0, 20); // Slice to show only top 20
+            scoreElement.textContent = `คะแนน: ${score}`;
+            
+            currentPlayer.level = currentLevel;
+            currentPlayer.score = score;
+            currentPlayer.questionIndex = currentQuestionIndex;
+            currentPlayer.totalTime = totalTime;
+            savePlayerState();
 
-                    sortedData.forEach((record, index) => {
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td>${index + 1}</td>
-                            <td>${record.name}</td>
-                            <td>${record.level}</td>
-                            <td>${record.score}</td>
-                            <td>${record.total_time} วินาที</td>
-                        `;
-                        leaderboardBody.appendChild(row);
-                    });
-                } else {
-                    leaderboardBody.innerHTML = '<tr><td colspan="5">ไม่มีอันดับคะแนน</td></tr>';
-                }
-            });
-        }
+            setTimeout(() => {
+                showNewQuestion();
+            }, 1000);
+        }
 
-        function showStartScreen() {
-            clearInterval(timerInterval);
-            document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
-            startScreen.style.display = 'block';
-            displayLeaderboard();
-        }
+        async function endLevel() {
+            gameArea.style.display = 'none';
+            resultScreen.style.display = 'block';
+            finalScoreElement.textContent = `${score} / 30`;
 
-        function showSignupScreen() {
-            document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
-            nameInputScreen.style.display = 'block';
-            nameInput.value = '';
-        }
+            const isPerfectScore = score === 30;
+            const playerRecord = {
+                name: currentPlayer.name,
+                level: currentLevel,
+                score: score,
+                total_time: totalTime
+            };
+            
+            await saveScoreToFirebase(playerRecord);
+            
+            if (isPerfectScore) {
+                resultMessage.textContent = 'ยอดเยี่ยมมาก! คุณทำคะแนนเต็ม!';
+                if (currentLevel < allWords.length) {
+                    currentPlayer.unlockedLevels = Math.max(currentPlayer.unlockedLevels, currentLevel + 1);
+                    await playersRef.child(currentPlayer.name).update({
+                        unlockedLevels: currentPlayer.unlockedLevels,
+                        currentLevel: currentLevel
+                    });
+                    continueButton.style.display = 'inline-block';
+                } else {
+                    resultMessage.textContent = 'ยอดเยี่ยม! คุณเล่นจบทุกเลเวลแล้ว!';
+                }
+            } else {
+                resultMessage.textContent = 'พยายามอีกครั้งนะ!';
+                continueButton.style.display = 'none';
+            }
+            savePlayerState();
+        }
 
-        function showLoginScreen() {
-            document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
-            loginScreen.style.display = 'block';
-            loginNameInput.value = '';
-        }
+        async function saveScoreToFirebase(record) {
+            const snapshot = await leaderboardRef.orderByChild('name').equalTo(record.name).once('value');
+            const existingScore = snapshot.val();
+            if (existingScore) {
+                const key = Object.keys(existingScore)[0];
+                const currentRecord = existingScore[key];
+                if (record.score > currentRecord.score || (record.score === currentRecord.score && record.total_time < currentRecord.total_time)) {
+                    leaderboardRef.child(key).update(record);
+                }
+            } else {
+                leaderboardRef.push(record);
+            }
+        }
 
-        async function showLevelSelectScreen() {
-            document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
-            levelSelectScreen.style.display = 'block';
-            levelGrid.innerHTML = '';
-            
-            const playerSnapshot = await playersRef.child(currentPlayer.name).once('value');
-            const unlockedLevels = playerSnapshot.val()?.unlockedLevels || 1;
-            currentPlayer.unlockedLevels = unlockedLevels;
-            savePlayerState();
+        function startGame(level) {
+            currentLevel = level;
+            score = 0;
+            totalTime = 0;
+            currentQuestionIndex = 0;
+            currentWords = [...allWords[currentLevel - 1]];
+            currentWords.sort(() => Math.random() - 0.5);
+            scoreElement.textContent = `คะแนน: ${score}`;
+            levelDisplay.textContent = `เลเวล: ${currentLevel}`;
+            showScreen(gameArea);
+            showNewQuestion();
+        }
 
-            for (let i = 1; i <= allWords.length; i++) {
-                const button = document.createElement('button');
-                button.textContent = `เลเวล ${i}`;
-                button.classList.add('level-button');
-                if (i > unlockedLevels) {
-                    button.classList.add('locked');
-                    button.disabled = true;
-                } else {
-                    button.onclick = () => startLevel(i);
-                }
-                levelGrid.appendChild(button);
-            }
-        }
+        function resumeGame() {
+            if (!currentPlayer) {
+                alert("ไม่มีข้อมูลเกมที่เล่นค้างไว้");
+                return;
+            }
+            
+            currentLevel = currentPlayer.level || 1;
+            score = currentPlayer.score || 0;
+            totalTime = currentPlayer.totalTime || 0;
+            currentQuestionIndex = currentPlayer.questionIndex || 0;
+            currentWords = [...allWords[currentLevel - 1]];
+            currentWords.sort(() => Math.random() - 0.5);
 
-        function startLevel(level, resume = false) {
-            currentLevel = level;
-            currentWords = allWords[level - 1];
-            
-            if (resume) {
-                score = currentPlayer.score;
-                currentQuestionIndex = currentPlayer.questionIndex;
-                totalTime = currentPlayer.totalTime;
-            } else {
-                score = 0;
-                currentQuestionIndex = 0;
-                totalTime = 0;
-                currentWords.sort(() => Math.random() - 0.5);
-            }
-            
-            document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
-            gameArea.style.display = 'block';
-            scoreElement.textContent = `คะแนน: ${score}`;
-            levelDisplay.textContent = `เลเวล: ${currentLevel}`;
-            
-            showNewQuestion();
-        }
+            scoreElement.textContent = `คะแนน: ${score}`;
+            levelDisplay.textContent = `เลเวล: ${currentLevel}`;
+            showScreen(gameArea);
+            showNewQuestion();
+        }
 
-        function pauseGame() {
-            clearInterval(timerInterval);
-            isPaused = true;
-            pauseButton.style.display = 'none';
-            resumeButton.style.display = 'inline-block';
-            homeButton.style.display = 'inline-block';
-            levelSelectButton.style.display = 'inline-block';
-            optionsContainer.style.pointerEvents = 'none';
-            savePlayerState();
-        }
+        async function createNewPlayer(playerName) {
+            if (!playerName) {
+                alert("กรุณาใส่ชื่อของคุณ!");
+                return;
+            }
+            const snapshot = await playersRef.child(playerName).once('value');
+            if (snapshot.exists()) {
+                alert('ชื่อนี้มีคนใช้แล้ว! กรุณาใช้ชื่ออื่น');
+            } else {
+                const newPlayer = {
+                    name: playerName,
+                    unlockedLevels: 1,
+                    currentLevel: 1,
+                    score: 0,
+                    questionIndex: 0,
+                    totalTime: 0
+                };
+                playersRef.child(playerName).set(newPlayer);
+                currentPlayer = newPlayer;
+                savePlayerState();
+                showScreen(levelSelectScreen);
+                createLevelButtons();
+            }
+        }
 
-        function resumeGame() {
-            resumeButton.style.display = 'none';
-            homeButton.style.display = 'none';
-            levelSelectButton.style.display = 'none';
-            pauseButton.style.display = 'inline-block';
-            optionsContainer.style.pointerEvents = 'auto';
-            isPaused = false;
-            startTimer();
-        }
+        async function loginPlayer(playerName) {
+            if (!playerName) {
+                alert("กรุณาใส่ชื่อของคุณ!");
+                return;
+            }
+            const snapshot = await playersRef.child(playerName).once('value');
+            if (snapshot.exists()) {
+                currentPlayer = snapshot.val();
+                savePlayerState();
+                showScreen(levelSelectScreen);
+                createLevelButtons();
+            } else {
+                alert('ไม่พบชื่อผู้ใช้นี้ กรุณาสมัครชื่อใหม่');
+            }
+        }
 
-        // Event Listeners
-        startButton.addEventListener('click', () => {
-            if (currentPlayer) {
-                showLevelSelectScreen();
-            } else {
-                showSignupScreen();
-            }
-        });
-        
-        goToLoginButton.addEventListener('click', showLoginScreen);
-        goToSignupButton.addEventListener('click', showSignupScreen);
+        function init() {
+            if (currentPlayer && currentPlayer.name) {
+                // If a player is already logged in, show the resume button
+                startButton.style.display = 'none';
+                resumeLastGameButton.style.display = 'inline-block';
+            } else {
+                startButton.style.display = 'inline-block';
+                resumeLastGameButton.style.display = 'none';
+            }
+            showScreen(startScreen);
+            loadLeaderboard();
+        }
 
-        submitNameButton.addEventListener('click', async () => {
-            const name = nameInput.value.trim();
-            if (name) {
-                const snapshot = await playersRef.child(name).once('value');
-                if (snapshot.exists()) {
-                    alert('ชื่อนี้ถูกใช้แล้ว กรุณาใช้ชื่ออื่น');
-                } else {
-                    currentPlayer = { name: name, unlockedLevels: 1, score: 0, questionIndex: 0, totalTime: 0 };
-                    await playersRef.child(name).set(currentPlayer);
-                    savePlayerState();
-                    showLevelSelectScreen();
-                }
-            } else {
-                alert('กรุณาใส่ชื่อของคุณก่อน!');
-            }
-        });
+        // Event Listeners
+        startButton.addEventListener('click', () => {
+            clearPlayerState();
+            showScreen(nameInputScreen);
+        });
+        resumeLastGameButton.addEventListener('click', () => {
+            showScreen(levelSelectScreen);
+            createLevelButtons();
+        });
+        submitNameButton.addEventListener('click', () => {
+            createNewPlayer(nameInput.value.trim());
+        });
+        loginButton.addEventListener('click', () => {
+            loginPlayer(loginNameInput.value.trim());
+        });
+        continueButton.addEventListener('click', () => {
+            startGame(currentLevel + 1);
+        });
+        restartButton.addEventListener('click', () => {
+            showScreen(levelSelectScreen);
+            createLevelButtons();
+        });
+        pauseButton.addEventListener('click', () => {
+            isPaused = true;
+            clearInterval(timerInterval);
+            resumeButton.style.display = 'inline-block';
+            pauseButton.style.display = 'none';
+            homeButton.style.display = 'inline-block';
+            levelSelectButton.style.display = 'inline-block';
+        });
+        resumeButton.addEventListener('click', () => {
+            isPaused = false;
+            startTimer();
+            resumeButton.style.display = 'none';
+            pauseButton.style.display = 'inline-block';
+            homeButton.style.display = 'none';
+            levelSelectButton.style.display = 'none';
+        });
+        homeButton.addEventListener('click', () => {
+            clearPlayerState();
+            clearInterval(timerInterval);
+            init();
+        });
+        levelSelectButton.addEventListener('click', () => {
+            clearInterval(timerInterval);
+            showScreen(levelSelectScreen);
+            createLevelButtons();
+        });
+        goToLoginButton.addEventListener('click', () => {
+            showScreen(loginScreen);
+        });
+        goToSignupButton.addEventListener('click', () => {
+            showScreen(nameInputScreen);
+        });
+        goToHomeFromLevelSelectButton.addEventListener('click', () => {
+            init();
+        });
 
-        loginButton.addEventListener('click', async () => {
-            const name = loginNameInput.value.trim();
-            if (name) {
-                const snapshot = await playersRef.child(name).once('value');
-                if (snapshot.exists()) {
-                    currentPlayer = snapshot.val();
-                    savePlayerState();
-                    showLevelSelectScreen();
-                } else {
-                    alert('ไม่พบชื่อผู้เล่นนี้ กรุณาตรวจสอบชื่ออีกครั้ง');
-                }
-            } else {
-                alert('กรุณาใส่ชื่อของคุณก่อน!');
-            }
-        });
-
-        resumeLastGameButton.addEventListener('click', () => {
-            if (currentPlayer && currentPlayer.questionIndex > 0) {
-                startLevel(currentPlayer.level, true);
-            } else {
-                alert('ไม่พบเกมที่เล่นค้างไว้');
-                showStartScreen();
-            }
-        });
-
-        restartButton.addEventListener('click', showLevelSelectScreen);
-        pauseButton.addEventListener('click', pauseGame);
-        resumeButton.addEventListener('click', resumeGame);
-        homeButton.addEventListener('click', showStartScreen);
-        levelSelectButton.addEventListener('click', showLevelSelectScreen);
-        goToHomeFromLevelSelectButton.addEventListener('click', showStartScreen);
-
-        // Initial setup on page load
-        document.addEventListener('DOMContentLoaded', () => {
-            currentPlayer = JSON.parse(localStorage.getItem('currentPlayer'));
-            if (currentPlayer && currentPlayer.questionIndex > 0) {
-                resumeLastGameButton.style.display = 'inline-block';
-            } else {
-                resumeLastGameButton.style.display = 'none';
-            }
-            showStartScreen();
-        });
-    </script>
+        init();
+    </script>
 </body>
 </html>
