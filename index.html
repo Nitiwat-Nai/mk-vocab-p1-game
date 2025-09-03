@@ -56,6 +56,27 @@
             display: none;
             animation: fadeIn 1s ease-in-out;
         }
+        
+        #leaderboard-table-container {
+             display: flex;
+             justify-content: center;
+             margin-bottom: 20px;
+        }
+        
+        .leaderboard-toggle-button {
+            padding: 10px 20px;
+            margin: 0 5px;
+            background-color: var(--pastel-yellow);
+            border: none;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .leaderboard-toggle-button.active {
+            background-color: #FFD700;
+            font-weight: bold;
+        }
 
         .main-button, .level-button {
             background-color: var(--pastel-pink);
@@ -288,6 +309,10 @@
             margin: 20px 0;
             text-align: center;
         }
+        
+        .hidden-table {
+            display: none;
+        }
 
         @keyframes fadeIn {
             from { opacity: 0; }
@@ -303,7 +328,12 @@
             <p style="font-size:1.5rem;">มาทดสอบความรู้คำศัพท์ภาษาอังกฤษกันเถอะ!</p>
             <div id="leaderboard">
                 <h3>🏆 อันดับผู้เล่นยอดเยี่ยม 🏆</h3>
-                <table id="leaderboard-table">
+                <div id="leaderboard-table-container">
+                    <button id="mc-leaderboard-button" class="leaderboard-toggle-button active">โหมดเลือกตอบ</button>
+                    <button id="matching-leaderboard-button" class="leaderboard-toggle-button">โหมดจับคู่</button>
+                </div>
+                
+                <table id="mc-leaderboard-table" class="leaderboard-table">
                     <thead>
                         <tr>
                             <th>อันดับ</th>
@@ -313,7 +343,19 @@
                             <th>เวลา</th>
                         </tr>
                     </thead>
-                    <tbody id="leaderboard-body">
+                    <tbody id="mc-leaderboard-body">
+                        </tbody>
+                </table>
+                
+                <table id="matching-leaderboard-table" class="leaderboard-table hidden-table">
+                    <thead>
+                        <tr>
+                            <th>อันดับ</th>
+                            <th>ชื่อ</th>
+                            <th>เวลา</th>
+                        </tr>
+                    </thead>
+                    <tbody id="matching-leaderboard-body">
                         </tbody>
                 </table>
             </div>
@@ -423,7 +465,8 @@
         };
         firebase.initializeApp(firebaseConfig);
         const database = firebase.database();
-        const leaderboardRef = database.ref('leaderboard');
+        const mcLeaderboardRef = database.ref('leaderboard');
+        const matchingLeaderboardRef = database.ref('matchingleaderboard');
         const playersRef = database.ref('players');
 
         // สร้าง Audio Context สำหรับเสียง
@@ -499,7 +542,14 @@
         const submitNameButton = document.getElementById('submit-name-button');
         const loginNameInput = document.getElementById('login-name-input');
         const loginButton = document.getElementById('login-button');
-        const leaderboardBody = document.getElementById('leaderboard-body');
+        
+        const mcLeaderboardBody = document.getElementById('mc-leaderboard-body');
+        const matchingLeaderboardBody = document.getElementById('matching-leaderboard-body');
+        const mcLeaderboardButton = document.getElementById('mc-leaderboard-button');
+        const matchingLeaderboardButton = document.getElementById('matching-leaderboard-button');
+        const mcLeaderboardTable = document.getElementById('mc-leaderboard-table');
+        const matchingLeaderboardTable = document.getElementById('matching-leaderboard-table');
+        
         const goToLoginButton = document.getElementById('go-to-login-button');
         const goToSignupButton = document.getElementById('go-to-signup-button');
         const goToHomeFromLevelSelectButton = document.getElementById('go-to-home-from-level-select');
@@ -647,7 +697,7 @@
             
             // Save final score to leaderboard
             if (currentPlayer) {
-                const newScoreRef = leaderboardRef.push();
+                const newScoreRef = mcLeaderboardRef.push();
                 newScoreRef.set({
                     id: currentPlayer.id,
                     name: currentPlayer.name,
@@ -679,8 +729,8 @@
             }
         }
 
-        function fetchLeaderboard() {
-            leaderboardRef.orderByChild('timestamp').limitToLast(10).on('value', (snapshot) => {
+        function fetchMCLeaderboard() {
+            mcLeaderboardRef.orderByChild('timestamp').limitToLast(10).on('value', (snapshot) => {
                 const scores = [];
                 snapshot.forEach((childSnapshot) => {
                     const scoreData = childSnapshot.val();
@@ -697,7 +747,7 @@
                     return a.time - b.time;
                 });
                 
-                leaderboardBody.innerHTML = '';
+                mcLeaderboardBody.innerHTML = '';
                 scores.forEach((score, index) => {
                     const row = document.createElement('tr');
                     row.innerHTML = `
@@ -707,7 +757,30 @@
                         <td>${score.score}</td>
                         <td>${score.time}s</td>
                     `;
-                    leaderboardBody.appendChild(row);
+                    mcLeaderboardBody.appendChild(row);
+                });
+            });
+        }
+        
+        function fetchMatchingLeaderboard() {
+            matchingLeaderboardRef.orderByChild('time').limitToFirst(10).on('value', (snapshot) => {
+                const scores = [];
+                snapshot.forEach((childSnapshot) => {
+                    const scoreData = childSnapshot.val();
+                    scores.push(scoreData);
+                });
+                
+                scores.sort((a, b) => a.time - b.time);
+                
+                matchingLeaderboardBody.innerHTML = '';
+                scores.forEach((score, index) => {
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td>${index + 1}</td>
+                        <td>${score.name}</td>
+                        <td>${score.time}s</td>
+                    `;
+                    matchingLeaderboardBody.appendChild(row);
                 });
             });
         }
@@ -820,6 +893,17 @@
             clearInterval(matchingTimerInterval);
             showScreen('matching-result-screen');
             matchingFinalScore.textContent = `${matchingTimer} วินาที`;
+            
+            // Save matching game score to matchingLeaderboard
+            if (currentPlayer) {
+                const newScoreRef = matchingLeaderboardRef.push();
+                newScoreRef.set({
+                    id: currentPlayer.id,
+                    name: currentPlayer.name,
+                    time: matchingTimer,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP
+                });
+            }
         }
 
         // --- Event Listeners and Initial Load ---
@@ -905,6 +989,22 @@
         matchingRestartButton.addEventListener('click', () => showScreen('start-screen'));
         
         playAgainMatchingButton.addEventListener('click', () => startMatchingGame());
+        
+        mcLeaderboardButton.addEventListener('click', () => {
+            mcLeaderboardButton.classList.add('active');
+            matchingLeaderboardButton.classList.remove('active');
+            mcLeaderboardTable.classList.remove('hidden-table');
+            matchingLeaderboardTable.classList.add('hidden-table');
+            fetchMCLeaderboard();
+        });
+        
+        matchingLeaderboardButton.addEventListener('click', () => {
+            matchingLeaderboardButton.classList.add('active');
+            mcLeaderboardButton.classList.remove('active');
+            matchingLeaderboardTable.classList.remove('hidden-table');
+            mcLeaderboardTable.classList.add('hidden-table');
+            fetchMatchingLeaderboard();
+        });
 
         pauseButton.addEventListener('click', () => {
             isPaused = true;
@@ -931,7 +1031,7 @@
             } else {
                 resumeLastGameButton.style.display = 'none';
             }
-            fetchLeaderboard();
+            fetchMCLeaderboard();
             showScreen('start-screen');
         });
     </script>
