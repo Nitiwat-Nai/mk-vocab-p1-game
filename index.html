@@ -23,7 +23,13 @@
 
         body {
             font-family: 'Mitr', sans-serif;
-            background: linear-gradient(135deg, var(--pastel-blue), var(--pastel-green));
+            /* เพิ่มภาพพื้นหลังที่นี่ */
+            background-image: url('https://i.imgur.com/your-cute-cartoon-bg.png'); /* **เปลี่ยน URL นี้ด้วยรูปภาพของคุณ** */
+            background-size: cover; /* ครอบคลุมพื้นที่ทั้งหมด */
+            background-position: center; /* จัดตำแหน่งกึ่งกลาง */
+            background-repeat: no-repeat; /* ไม่ซ้ำภาพ */
+            background-attachment: fixed; /* ทำให้ภาพพื้นหลังอยู่กับที่เมื่อเลื่อนหน้าจอ */
+            
             color: var(--text-color);
             display: flex;
             justify-content: center;
@@ -35,7 +41,7 @@
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.9);
+            background-color: rgba(255, 255, 255, 0.8); /* ปรับความโปร่งใสเล็กน้อย */
             padding: 40px;
             border-radius: 25px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
@@ -274,28 +280,28 @@
         }
 
         /* Leaderboard styles */
-        #leaderboard-table {
+        .leaderboard-table {
             width: 100%;
             border-collapse: collapse;
             margin-top: 20px;
         }
 
-        #leaderboard-table th, #leaderboard-table td {
+        .leaderboard-table th, .leaderboard-table td {
             padding: 10px;
             border-bottom: 1px solid #ddd;
             text-align: left;
         }
 
-        #leaderboard-table th {
+        .leaderboard-table th {
             background-color: var(--pastel-blue);
             color: white;
         }
 
-        #leaderboard-table tr:nth-child(even) {
+        .leaderboard-table tr:nth-child(even) {
             background-color: #f9f9f9;
         }
 
-        #leaderboard-table tr:hover {
+        .leaderboard-table tr:hover {
             background-color: #f1f1f1;
         }
 
