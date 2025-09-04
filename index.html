@@ -648,7 +648,7 @@
         // --- Player Management ---
         function savePlayerProgress(mode) {
             if (playerName && mode === 'mc') {
-                playersRef.child(playerName).set({
+                playersRef.child(playerName).update({
                     level: currentLevel,
                     score: score,
                     questionIndex: currentQuestionIndex
@@ -660,13 +660,28 @@
             if (playerName) {
                 playersRef.child(playerName).once('value', (snapshot) => {
                     const data = snapshot.val();
-                    if (data) {
+                    if (data && data.level > 1) {
                         resumeLastGameButton.style.display = 'block';
                     } else {
                         resumeLastGameButton.style.display = 'none';
                     }
                 });
             }
+        }
+        
+        function savePlayerName(name) {
+            localStorage.setItem('playerName', name);
+            playerName = name;
+        }
+
+        function loadPlayerName() {
+            const name = localStorage.getItem('playerName');
+            if (name) {
+                playerName = name;
+                isLoggedIn = true;
+                return true;
+            }
+            return false;
         }
 
         function startNewGame() {
@@ -803,15 +818,18 @@
                 continueButton.style.display = 'block';
                 continueButton.innerText = `เล่นเลเวล ${currentLevel + 1}`;
                 saveLeaderboardScore(mcLeaderboardRef, { name: playerName, level: currentLevel, score: score, time: totalTime });
-                savePlayerProgress('mc');
-                // If current level is unlocked, unlock the next one
-                const nextLevel = currentLevel + 1;
-                playersRef.child(playerName).update({ level: nextLevel, score: 0, questionIndex: 0 });
+                
+                // อัปเดตเลเวลสูงสุดเมื่อผ่านเท่านั้น
+                playersRef.child(playerName).once('value', (snapshot) => {
+                    const playerData = snapshot.val();
+                    if (playerData.level < currentLevel + 1) {
+                         playersRef.child(playerName).update({ level: currentLevel + 1, score: 0, questionIndex: 0 });
+                    }
+                });
             } else if (score >= 20 && currentLevel === 10) {
                 resultMessage.innerText = 'คุณทำได้ดีมาก! ครบทุกเลเวลแล้ว! 🎉';
                 continueButton.style.display = 'none';
                 saveLeaderboardScore(mcLeaderboardRef, { name: playerName, level: currentLevel, score: score, time: totalTime });
-                savePlayerProgress('mc');
             } else {
                 resultMessage.innerText = 'ลองอีกครั้งนะ! สู้ๆ 💪';
                 continueButton.style.display = 'none';
@@ -961,7 +979,12 @@
 
         // --- Event Listeners ---
         window.onload = () => {
-            showScreen(startScreen);
+            if (loadPlayerName()) {
+                isLoggedIn = true;
+                showScreen(startScreen);
+            } else {
+                showScreen(nameInputScreen);
+            }
             updateLeaderboard('mc');
         };
         
@@ -1031,7 +1054,7 @@
                     if (snapshot.exists()) {
                         alert('ชื่อนี้ถูกใช้แล้ว โปรดใช้ชื่ออื่น');
                     } else {
-                        playerName = name;
+                        savePlayerName(name);
                         isLoggedIn = true;
                         playersRef.child(playerName).set({ level: 1, score: 0, questionIndex: 0 });
                         showScreen(modeSelectScreen);
@@ -1050,7 +1073,7 @@
             if (name) {
                 playersRef.child(name).once('value', (snapshot) => {
                     if (snapshot.exists()) {
-                        playerName = name;
+                        savePlayerName(name);
                         isLoggedIn = true;
                         showScreen(modeSelectScreen);
                     } else {
