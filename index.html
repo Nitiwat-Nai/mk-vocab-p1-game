@@ -682,6 +682,7 @@
             currentLevel = level;
             score = 0;
             currentQuestionIndex = 0;
+            totalTime = 0; // Reset totalTime for new game
             currentWords = shuffleArray(allWords[currentLevel - 1]);
             updateScoreAndLevel();
             showScreen(gameArea);
@@ -923,6 +924,7 @@
             clearInterval(matchingTimerInterval);
             showScreen(matchingResultScreen);
             document.getElementById('matching-final-score').innerText = `${matchingTimer} วินาที`;
+            // แก้ไข: บันทึกข้อมูลเวลาของโหมดจับคู่
             saveLeaderboardScore(matchingLeaderboardRef, { name: playerName, time: matchingTimer });
         }
         
