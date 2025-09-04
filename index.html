@@ -23,13 +23,11 @@
 
         body {
             font-family: 'Mitr', sans-serif;
-            /* เพิ่มภาพพื้นหลังที่นี่ */
-            background-image: url('https://raw.githubusercontent.com/Nitiwat-Nai/my-image-host/refs/heads/main/Match.jpg'); /* **เปลี่ยน URL นี้ด้วยรูปภาพของคุณ** */
-            background-size: cover; /* ครอบคลุมพื้นที่ทั้งหมด */
-            background-position: center; /* จัดตำแหน่งกึ่งกลาง */
-            background-repeat: no-repeat; /* ไม่ซ้ำภาพ */
-            background-attachment: fixed; /* ทำให้ภาพพื้นหลังอยู่กับที่เมื่อเลื่อนหน้าจอ */
-            
+            background-image: url('https://raw.githubusercontent.com/Nitiwat-Nai/my-image-host/refs/heads/main/Match.jpg');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            background-attachment: fixed;
             color: var(--text-color);
             display: flex;
             justify-content: center;
@@ -41,7 +39,7 @@
         }
 
         .container {
-            background-color: rgba(255, 255, 255, 0.6); /* ปรับความโปร่งใสเล็กน้อย */
+            background-color: rgba(255, 255, 255, 0.6);
             padding: 40px;
             border-radius: 25px;
             box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
@@ -64,9 +62,9 @@
         }
         
         #leaderboard-table-container {
-             display: flex;
-             justify-content: center;
-             margin-bottom: 20px;
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
         }
         
         .leaderboard-toggle-button {
@@ -82,6 +80,10 @@
         .leaderboard-toggle-button.active {
             background-color: #FFD700;
             font-weight: bold;
+        }
+
+        .leaderboard-toggle-button:hover {
+            background-color: #FFECB3;
         }
 
         .main-button, .level-button {
@@ -172,7 +174,7 @@
         }
         
         .matching-button.matched {
-             pointer-events: none; /* Disable click after matched */
+            pointer-events: none;
         }
         
         .option-button:hover, .matching-button:not(.matched):hover {
@@ -201,18 +203,6 @@
             font-size: 2rem;
             font-weight: bold;
         }
-        
-        .matching-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 15px;
-            margin-top: 20px;
-        }
-        
-        .matching-button {
-            padding: 15px;
-            font-size: 1.2rem;
-        }
 
         #score-area {
             color: var(--text-color);
@@ -231,25 +221,25 @@
         }
         
         .matching-timer-area {
-             color: var(--wrong-color);
-             font-size: 2rem;
-             font-weight: bold;
-             background-color: var(--pastel-yellow);
-             border-radius: 50%;
-             width: 70px;
-             height: 70px;
-             display: flex;
-             justify-content: center;
-             align-items: center;
-             box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-             margin: 0 auto 20px;
+            color: var(--wrong-color);
+            font-size: 2rem;
+            font-weight: bold;
+            background-color: var(--pastel-yellow);
+            border-radius: 50%;
+            width: 70px;
+            height: 70px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            margin: 0 auto 20px;
         }
 
-        #pause-resume-buttons {
+        #pause-resume-buttons, #matching-pause-buttons {
             margin-top: 20px;
         }
 
-        #pause-button, #resume-button, #home-button, #level-select-button {
+        #pause-button, #resume-button, #home-button, #level-select-button, #matching-pause-button, #matching-resume-button, #matching-home-button {
             background-color: var(--pastel-yellow);
             color: var(--text-color);
             font-size: 1.2rem;
@@ -259,7 +249,7 @@
             margin: 5px;
         }
 
-        #pause-button:hover, #resume-button:hover, #home-button:hover, #level-select-button:hover {
+        #pause-button:hover, #resume-button:hover, #home-button:hover, #level-select-button:hover, #matching-pause-button:hover, #matching-resume-button:hover, #matching-home-button:hover {
             background-color: #FFECB3;
         }
 
@@ -350,7 +340,7 @@
                         </tr>
                     </thead>
                     <tbody id="mc-leaderboard-body">
-                        </tbody>
+                    </tbody>
                 </table>
                 
                 <table id="matching-leaderboard-table" class="leaderboard-table hidden-table">
@@ -362,7 +352,7 @@
                         </tr>
                     </thead>
                     <tbody id="matching-leaderboard-body">
-                        </tbody>
+                    </tbody>
                 </table>
             </div>
             <button id="start-button" class="main-button">เริ่มเกม</button>
@@ -420,6 +410,13 @@
                 <span id="matching-countdown">0</span>
             </div>
             <div id="matching-grid" class="options-grid"></div>
+            <div id="matching-pause-buttons" style="margin-top: 20px;">
+                <button id="matching-pause-button" class="main-button">หยุดชั่วคราว</button>
+                <div id="matching-paused-controls" style="display:none;">
+                    <button id="matching-resume-button" class="main-button">เล่นต่อ</button>
+                    <button id="matching-home-button" class="main-button">กลับหน้าหลัก</button>
+                </div>
+            </div>
         </div>
 
         <div id="result-screen">
@@ -548,497 +545,583 @@
         const submitNameButton = document.getElementById('submit-name-button');
         const loginNameInput = document.getElementById('login-name-input');
         const loginButton = document.getElementById('login-button');
-        
-        const mcLeaderboardBody = document.getElementById('mc-leaderboard-body');
-        const matchingLeaderboardBody = document.getElementById('matching-leaderboard-body');
+        const goToSignupButton = document.getElementById('go-to-signup-button');
+        const goToLoginButton = document.getElementById('go-to-login-button');
+        const goToHomeFromLevelSelect = document.getElementById('go-to-home-from-level-select');
+        const goToHomeFromModeSelect = document.getElementById('go-to-home-from-mode-select');
         const mcLeaderboardButton = document.getElementById('mc-leaderboard-button');
         const matchingLeaderboardButton = document.getElementById('matching-leaderboard-button');
         const mcLeaderboardTable = document.getElementById('mc-leaderboard-table');
         const matchingLeaderboardTable = document.getElementById('matching-leaderboard-table');
-        
-        const goToLoginButton = document.getElementById('go-to-login-button');
-        const goToSignupButton = document.getElementById('go-to-signup-button');
-        const goToHomeFromLevelSelectButton = document.getElementById('go-to-home-from-level-select');
-        const goToHomeFromModeSelectButton = document.getElementById('go-to-home-from-mode-select');
+        const mcLeaderboardBody = document.getElementById('mc-leaderboard-body');
+        const matchingLeaderboardBody = document.getElementById('matching-leaderboard-body');
         const matchingGrid = document.getElementById('matching-grid');
-        const matchingFinalScore = document.getElementById('matching-final-score');
         const matchingCountdown = document.getElementById('matching-countdown');
-        
-        let currentPlayer = JSON.parse(localStorage.getItem('currentPlayer')) || null;
-        
-        function showScreen(screenId) {
-            document.querySelectorAll('.container > div').forEach(div => div.style.display = 'none');
-            document.getElementById(screenId).style.display = 'block';
+        // ตัวแปรสำหรับปุ่มใหม่ในโหมดจับคู่
+        const matchingPauseButton = document.getElementById('matching-pause-button');
+        const matchingPausedControls = document.getElementById('matching-paused-controls');
+        const matchingResumeButton = document.getElementById('matching-resume-button');
+        const matchingHomeButton = document.getElementById('matching-home-button');
+
+        let isLoggedIn = false;
+        let playerName = '';
+        let currentMode = 'mc'; // 'mc' for multiple choice, 'matching' for matching
+
+        // --- Screen Management ---
+        function showScreen(screen) {
+            const screens = [startScreen, modeSelectScreen, nameInputScreen, loginScreen, levelSelectScreen, gameArea, matchingGameArea, resultScreen, matchingResultScreen];
+            screens.forEach(s => {
+                if (s === screen) {
+                    s.style.display = 'block';
+                } else {
+                    s.style.display = 'none';
+                }
+            });
         }
 
-        function savePlayerState() {
-            if (currentPlayer) {
-                localStorage.setItem('currentPlayer', JSON.stringify(currentPlayer));
+        // --- Utility Functions ---
+        function shuffleArray(array) {
+            for (let i = array.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [array[i], array[j]] = [array[j], array[i]];
+            }
+            return array;
+        }
+
+        function formatTime(seconds) {
+            const minutes = Math.floor(seconds / 60);
+            const remainingSeconds = seconds % 60;
+            const pad = (num) => num.toString().padStart(2, '0');
+            return `${pad(minutes)}:${pad(remainingSeconds)}`;
+        }
+
+        // --- Leaderboard Functions ---
+        function updateLeaderboard(mode) {
+            const ref = mode === 'mc' ? mcLeaderboardRef : matchingLeaderboardRef;
+            const tbody = mode === 'mc' ? mcLeaderboardBody : matchingLeaderboardBody;
+
+            ref.orderByChild(mode === 'mc' ? 'score' : 'time').limitToLast(10).once('value', (snapshot) => {
+                const scores = [];
+                snapshot.forEach((child) => {
+                    scores.push(child.val());
+                });
+                // Sort based on score (desc) for MC and time (asc) for Matching
+                if (mode === 'mc') {
+                    scores.sort((a, b) => b.score - a.score || a.time - b.time);
+                } else {
+                    scores.sort((a, b) => a.time - b.time);
+                }
+
+                tbody.innerHTML = '';
+                scores.forEach((item, index) => {
+                    const row = document.createElement('tr');
+                    if (mode === 'mc') {
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.level}</td>
+                            <td>${item.score}</td>
+                            <td>${formatTime(item.time)}</td>
+                        `;
+                    } else {
+                        row.innerHTML = `
+                            <td>${index + 1}</td>
+                            <td>${item.name}</td>
+                            <td>${item.time} วินาที</td>
+                        `;
+                    }
+                    tbody.appendChild(row);
+                });
+            });
+        }
+        
+        function saveLeaderboardScore(ref, scoreData) {
+            ref.push(scoreData, (error) => {
+                if (error) {
+                    console.error("Data could not be saved." + error);
+                } else {
+                    console.log("Data saved successfully.");
+                }
+            });
+        }
+
+        // --- Player Management ---
+        function savePlayerProgress(mode) {
+            if (playerName && mode === 'mc') {
+                playersRef.child(playerName).set({
+                    level: currentLevel,
+                    score: score,
+                    questionIndex: currentQuestionIndex
+                });
             }
         }
 
-        function clearPlayerState() {
-            localStorage.removeItem('currentPlayer');
-            currentPlayer = null;
-        }
-
-        function getFakeOptions(correctAnswer) {
-            const fakeOptions = [];
-            const allEnglishWords = allWords.flat().map(w => w.english);
-            while (fakeOptions.length < 3) {
-                const randomWord = allEnglishWords[Math.floor(Math.random() * allEnglishWords.length)];
-                if (randomWord !== correctAnswer.english && !fakeOptions.includes(randomWord)) {
-                    fakeOptions.push(randomWord);
-                }
+        function loadPlayerProgress() {
+            if (playerName) {
+                playersRef.child(playerName).once('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        resumeLastGameButton.style.display = 'block';
+                    } else {
+                        resumeLastGameButton.style.display = 'none';
+                    }
+                });
             }
-            return fakeOptions;
         }
 
-        function startTimer() {
-            if (isPaused) return;
-            timeLeft = 10;
-            countdownElement.textContent = timeLeft;
-            timerInterval = setInterval(() => {
-                if (isPaused) {
-                    clearInterval(timerInterval);
-                    return;
-                }
-                timeLeft--;
-                countdownElement.textContent = Math.max(0, timeLeft);
-                if (timeLeft <= 0) {
-                    clearInterval(timerInterval);
-                    totalTime += 10;
-                    handleAnswer(null, currentWords[currentQuestionIndex - 1].english);
-                }
-            }, 1000);
+        function startNewGame() {
+            if (!isLoggedIn) {
+                showScreen(nameInputScreen);
+            } else {
+                showScreen(modeSelectScreen);
+            }
         }
         
-        function showNewQuestion() {
-            clearInterval(timerInterval);
-            if (currentQuestionIndex >= currentWords.length) {
-                endLevel();
+        // --- MC Mode Functions ---
+        function loadLevel(level) {
+            currentLevel = level;
+            score = 0;
+            currentQuestionIndex = 0;
+            currentWords = shuffleArray(allWords[currentLevel - 1]);
+            updateScoreAndLevel();
+            showScreen(gameArea);
+            showQuestion();
+            resumeGame();
+        }
+
+        function showQuestion() {
+            if (currentQuestionIndex >= 30) {
+                endGame();
                 return;
             }
 
-            const currentWord = currentWords[currentQuestionIndex];
-            questionElement.textContent = currentWord.thai;
-            optionsContainer.innerHTML = '';
-            
-            const options = [currentWord.english, ...getFakeOptions(currentWord)];
-            options.sort(() => Math.random() - 0.5);
+            timeLeft = timeLimit;
+            countdownElement.innerText = timeLeft;
 
+            const currentWord = currentWords[currentQuestionIndex];
+            questionElement.innerText = currentWord.english.toUpperCase();
+
+            const options = [currentWord.thai];
+            while (options.length < 4) {
+                const randomWord = allWords.flat()[Math.floor(Math.random() * allWords.flat().length)];
+                if (!options.includes(randomWord.thai)) {
+                    options.push(randomWord.thai);
+                }
+            }
+
+            shuffleArray(options);
+            optionsContainer.innerHTML = '';
             options.forEach(option => {
                 const button = document.createElement('button');
-                button.textContent = option;
+                button.innerText = option;
                 button.classList.add('option-button');
-                button.addEventListener('click', () => handleAnswer(button, currentWord.english));
+                button.addEventListener('click', () => checkAnswer(option, currentWord.thai, button));
                 optionsContainer.appendChild(button);
             });
+        }
 
-            currentQuestionIndex++;
+        function checkAnswer(selectedAnswer, correctAnswer, button) {
+            pauseTimer();
+            const allButtons = document.querySelectorAll('.option-button');
+            allButtons.forEach(btn => btn.disabled = true);
+
+            if (selectedAnswer === correctAnswer) {
+                playSound(true);
+                button.classList.add('correct');
+                score++;
+            } else {
+                playSound(false);
+                button.classList.add('wrong');
+                const correctButton = Array.from(allButtons).find(btn => btn.innerText === correctAnswer);
+                if (correctButton) {
+                    correctButton.classList.add('correct');
+                }
+            }
+
+            updateScoreAndLevel();
+
+            setTimeout(() => {
+                currentQuestionIndex++;
+                showQuestion();
+                resumeGame();
+            }, 1500);
+        }
+
+        function updateScoreAndLevel() {
+            scoreElement.innerText = `คะแนน: ${score}`;
+            levelDisplay.innerText = `เลเวล: ${currentLevel}`;
+        }
+
+        function pauseGame() {
+            isPaused = true;
+            clearInterval(timerInterval);
+            pauseButton.style.display = 'none';
+            resumeButton.style.display = 'inline-block';
+            levelSelectButton.style.display = 'inline-block';
+            homeButton.style.display = 'inline-block';
+            document.querySelectorAll('.option-button').forEach(btn => btn.disabled = true);
+        }
+
+        function resumeGame() {
+            isPaused = false;
+            pauseButton.style.display = 'inline-block';
+            resumeButton.style.display = 'none';
+            levelSelectButton.style.display = 'none';
+            homeButton.style.display = 'none';
+            document.querySelectorAll('.option-button').forEach(btn => btn.disabled = false);
             startTimer();
         }
 
-        function handleAnswer(clickedButton, correctAnswer) {
+        function startTimer() {
             clearInterval(timerInterval);
-            let correct = false;
-            if (clickedButton) {
-                correct = (clickedButton.textContent === correctAnswer);
-            }
-            
-            if (correct) {
-                score++;
-                totalTime += (10 - timeLeft);
-                playSound(true);
-            } else {
-                playSound(false);
-            }
-            
-            scoreElement.textContent = `คะแนน: ${score}`;
-            
-            Array.from(optionsContainer.children).forEach(button => {
-                button.disabled = true;
-                if (button.textContent === correctAnswer) {
-                    button.classList.add('correct');
-                } else if (clickedButton && button === clickedButton) {
-                    button.classList.add('wrong');
-                }
-            });
-            
-            setTimeout(showNewQuestion, 1500);
-        }
-
-        function startLevel(level) {
-            currentLevel = level;
-            score = 0;
-            totalTime = 0;
-            currentQuestionIndex = 0;
-            currentWords = allWords[currentLevel - 1].sort(() => Math.random() - 0.5);
-            levelDisplay.textContent = `เลเวล: ${currentLevel}`;
-            scoreElement.textContent = `คะแนน: ${score}`;
-            showScreen('game-area');
-            showNewQuestion();
-        }
-        
-        function endLevel() {
-            clearInterval(timerInterval);
-            showScreen('result-screen');
-            finalScoreElement.textContent = `${score}`;
-            if (score >= 20) {
-                resultMessage.textContent = 'คุณผ่านเลเวลนี้แล้ว!';
-                continueButton.style.display = 'block';
-                // Check if player can unlock the next level
-                if (currentPlayer && currentLevel < allWords.length) {
-                    const nextLevel = currentLevel + 1;
-                    if (nextLevel > currentPlayer.unlockedLevels) {
-                        currentPlayer.unlockedLevels = nextLevel;
-                        playersRef.child(currentPlayer.id).update({ unlockedLevels: nextLevel });
-                        savePlayerState();
+            timerInterval = setInterval(() => {
+                if (!isPaused) {
+                    timeLeft--;
+                    totalTime++;
+                    countdownElement.innerText = timeLeft;
+                    if (timeLeft <= 0) {
+                        checkAnswer('', '', null);
                     }
                 }
+            }, 1000);
+        }
+
+        function pauseTimer() {
+            clearInterval(timerInterval);
+        }
+
+        function endGame() {
+            clearInterval(timerInterval);
+            showScreen(resultScreen);
+            finalScoreElement.innerText = score;
+            if (score >= 20 && currentLevel < 10) {
+                resultMessage.innerText = 'ผ่าน! ไปต่อเลเวลถัดไปได้เลย 🎉';
+                continueButton.style.display = 'block';
+                continueButton.innerText = `เล่นเลเวล ${currentLevel + 1}`;
+                saveLeaderboardScore(mcLeaderboardRef, { name: playerName, level: currentLevel, score: score, time: totalTime });
+                savePlayerProgress('mc');
+                // If current level is unlocked, unlock the next one
+                const nextLevel = currentLevel + 1;
+                playersRef.child(playerName).update({ level: nextLevel, score: 0, questionIndex: 0 });
+            } else if (score >= 20 && currentLevel === 10) {
+                resultMessage.innerText = 'คุณทำได้ดีมาก! ครบทุกเลเวลแล้ว! 🎉';
+                continueButton.style.display = 'none';
+                saveLeaderboardScore(mcLeaderboardRef, { name: playerName, level: currentLevel, score: score, time: totalTime });
+                savePlayerProgress('mc');
             } else {
-                resultMessage.textContent = 'ลองอีกครั้งนะ! สู้ๆ!';
+                resultMessage.innerText = 'ลองอีกครั้งนะ! สู้ๆ 💪';
                 continueButton.style.display = 'none';
             }
-            
-            // Save final score to leaderboard
-            if (currentPlayer) {
-                const newScoreRef = mcLeaderboardRef.push();
-                newScoreRef.set({
-                    id: currentPlayer.id,
-                    name: currentPlayer.name,
-                    level: currentLevel,
-                    score: score,
-                    time: totalTime,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
-            }
         }
         
-        function populateLevelSelect() {
-            levelGrid.innerHTML = '';
-            const maxLevels = allWords.length;
-            const unlockedLevels = currentPlayer ? currentPlayer.unlockedLevels : 1;
-            for (let i = 1; i <= maxLevels; i++) {
-                const button = document.createElement('button');
-                button.textContent = i;
-                button.classList.add('level-button');
-                if (i <= unlockedLevels) {
-                    button.addEventListener('click', () => {
-                        startLevel(i);
-                    });
-                } else {
-                    button.classList.add('locked');
-                    button.textContent = '🔒';
-                }
-                levelGrid.appendChild(button);
-            }
-        }
-
-        function fetchMCLeaderboard() {
-            mcLeaderboardRef.orderByChild('timestamp').limitToLast(10).on('value', (snapshot) => {
-                const scores = [];
-                snapshot.forEach((childSnapshot) => {
-                    const scoreData = childSnapshot.val();
-                    scores.push(scoreData);
-                });
-                
-                scores.sort((a, b) => {
-                    if (b.level !== a.level) {
-                        return b.level - a.level;
-                    }
-                    if (b.score !== a.score) {
-                        return b.score - a.score;
-                    }
-                    return a.time - b.time;
-                });
-                
-                mcLeaderboardBody.innerHTML = '';
-                scores.forEach((score, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${score.name}</td>
-                        <td>${score.level}</td>
-                        <td>${score.score}</td>
-                        <td>${score.time}s</td>
-                    `;
-                    mcLeaderboardBody.appendChild(row);
-                });
-            });
-        }
-        
-        function fetchMatchingLeaderboard() {
-            matchingLeaderboardRef.orderByChild('time').limitToFirst(10).on('value', (snapshot) => {
-                const scores = [];
-                snapshot.forEach((childSnapshot) => {
-                    const scoreData = childSnapshot.val();
-                    scores.push(scoreData);
-                });
-                
-                scores.sort((a, b) => a.time - b.time);
-                
-                matchingLeaderboardBody.innerHTML = '';
-                scores.forEach((score, index) => {
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td>${index + 1}</td>
-                        <td>${score.name}</td>
-                        <td>${score.time}s</td>
-                    `;
-                    matchingLeaderboardBody.appendChild(row);
-                });
-            });
-        }
-        
-        // --- Functions for Matching Game Mode ---
-        
-        function getRandomMatchingWords() {
-            const allWordsFlat = allWords.flat();
-            // Shuffle the entire list of words
-            for (let i = allWordsFlat.length - 1; i > 0; i--) {
-                const j = Math.floor(Math.random() * (i + 1));
-                [allWordsFlat[i], allWordsFlat[j]] = [allWordsFlat[j], allWordsFlat[i]];
-            }
-            // Take the first 6 words to create the pairs for this round
-            return allWordsFlat.slice(0, 6);
-        }
-
+        // --- Matching Mode Functions ---
         function startMatchingGame() {
-            showScreen('matching-game-area');
-            matchingPairsFound = 0;
-            matchingTimer = 0;
-            selectedButton = null;
-            matchingGrid.innerHTML = '';
+            const randomWords = shuffleArray(allWords.flat()).slice(0, matchingTotalPairs);
             
-            // Get 6 random words and their translations
-            const wordsToMatch = getRandomMatchingWords();
-            
-            // Combine English and Thai into a single list and shuffle it
-            const allButtons = [];
-            wordsToMatch.forEach(wordPair => {
-                allButtons.push({ type: 'english', text: wordPair.english, match: wordPair.thai });
-                allButtons.push({ type: 'thai', text: wordPair.thai, match: wordPair.english });
+            // สร้างข้อมูลสำหรับปุ่ม โดยสลับระหว่างภาษาไทยและอังกฤษ
+            const matchingData = [];
+            randomWords.forEach(word => {
+                matchingData.push({ text: word.thai, match: word.english });
+                matchingData.push({ text: word.english, match: word.thai });
             });
-
-            // Shuffle the buttons again
-            allButtons.sort(() => Math.random() - 0.5);
-
-            // Create and display the buttons
-            allButtons.forEach(item => {
+            shuffleArray(matchingData);
+            
+            matchingGrid.innerHTML = '';
+            matchingData.forEach((item) => {
                 const button = document.createElement('button');
-                button.textContent = item.text;
+                button.innerText = item.text;
+                button.setAttribute('data-match', item.match);
                 button.classList.add('matching-button');
-                button.dataset.match = item.match; // Store the matching word in a data attribute
-                button.addEventListener('click', () => handleMatchingClick(button));
+                button.addEventListener('click', () => checkMatch(button));
                 matchingGrid.appendChild(button);
             });
             
-            // Start the timer
+            matchingPairsFound = 0;
             matchingTimer = 0;
-            matchingCountdown.textContent = matchingTimer;
-            clearInterval(matchingTimerInterval); // Clear any previous timer
+            document.getElementById('matching-countdown').innerText = '0';
+            
+            clearInterval(matchingTimerInterval);
             matchingTimerInterval = setInterval(() => {
-                matchingTimer++;
-                matchingCountdown.textContent = matchingTimer;
+                if (!isPaused) {
+                    matchingTimer++;
+                    document.getElementById('matching-countdown').innerText = matchingTimer;
+                }
             }, 1000);
+            
+            isPaused = false;
+            matchingPauseButton.style.display = 'block';
+            matchingPausedControls.style.display = 'none';
+            document.querySelectorAll('.matching-button').forEach(btn => btn.disabled = false);
         }
         
-        function handleMatchingClick(clickedButton) {
-            if (clickedButton.classList.contains('matched')) {
-                return; // Do nothing if the button is already matched
+        function checkMatch(button) {
+            // ไม่ทำอะไรหากเกมหยุดชั่วคราว หรือปุ่มที่กดถูกจับคู่แล้ว
+            if (isPaused || button.classList.contains('matched')) return;
+
+            // ไม่ทำอะไรหากปุ่มที่กดเป็นปุ่มเดียวกับที่เลือกไว้ก่อนหน้า
+            if (button === selectedButton) return;
+            
+            // หากยังไม่มีปุ่มถูกเลือก ให้เก็บปุ่มที่กดไว้เป็นปุ่มที่เลือก
+            if (!selectedButton) {
+                selectedButton = button;
+                selectedButton.classList.add('selected');
+                return;
             }
 
-            // If no button is selected yet
-            if (!selectedButton) {
-                selectedButton = clickedButton;
-                selectedButton.classList.add('selected');
-                playSound(true); // A simple sound to indicate selection
+            // เมื่อมีปุ่มถูกเลือกแล้ว และมีการกดปุ่มใหม่
+            // ปิดการใช้งานปุ่มทั้งหมดชั่วคราว เพื่อป้องกันการกดซ้ำซ้อน
+            document.querySelectorAll('.matching-button').forEach(btn => btn.disabled = true);
+
+            const firstMatch = selectedButton.getAttribute('data-match');
+            const secondText = button.innerText;
+
+            const isMatch = (firstMatch === secondText);
+
+            if (isMatch) {
+                // ถ้าจับคู่ถูก
+                playSound(true);
+                selectedButton.classList.add('correct', 'matched');
+                button.classList.add('correct', 'matched');
+                matchingPairsFound++;
+                
+                // รีเซ็ตปุ่มที่เลือกไว้
+                selectedButton.classList.remove('selected');
+                selectedButton = null;
+                
+                // เปิดการใช้งานปุ่มที่ยังไม่ได้จับคู่ทั้งหมด
+                document.querySelectorAll('.matching-button:not(.matched)').forEach(btn => btn.disabled = false);
+
+                if (matchingPairsFound === matchingTotalPairs) {
+                    endMatchingGame();
+                }
+
             } else {
-                // If the same button is clicked again, deselect it
-                if (selectedButton === clickedButton) {
+                // ถ้าจับคู่ผิด
+                playSound(false);
+                button.classList.add('wrong');
+                selectedButton.classList.add('wrong');
+                
+                setTimeout(() => {
+                    // ลบสีแดงออก
+                    button.classList.remove('wrong');
+                    selectedButton.classList.remove('wrong');
+
+                    // รีเซ็ตปุ่มที่เลือกไว้
                     selectedButton.classList.remove('selected');
                     selectedButton = null;
-                    return;
-                }
-                
-                // A second button is clicked, check for a match
-                const isMatch = selectedButton.dataset.match === clickedButton.textContent || clickedButton.dataset.match === selectedButton.textContent;
-                
-                if (isMatch) {
-                    // Correct match
-                    selectedButton.classList.remove('selected');
-                    selectedButton.classList.add('correct');
-                    clickedButton.classList.add('correct');
-                    selectedButton.classList.add('matched');
-                    clickedButton.classList.add('matched');
-                    selectedButton.disabled = true;
-                    clickedButton.disabled = true;
-                    selectedButton = null;
-                    matchingPairsFound++;
-                    playSound(true); // Correct sound
-                    
-                    if (matchingPairsFound === matchingTotalPairs) {
-                        endMatchingGame();
-                    }
-                } else {
-                    // Wrong match
-                    selectedButton.classList.remove('selected');
-                    clickedButton.classList.add('wrong');
-                    playSound(false); // Wrong sound
-                    setTimeout(() => {
-                        clickedButton.classList.remove('wrong');
-                        selectedButton.classList.remove('wrong');
-                        selectedButton = null;
-                    }, 500); // Briefly show the wrong answer
-                }
+
+                    // เปิดการใช้งานปุ่มที่ยังไม่ได้จับคู่ทั้งหมด
+                    document.querySelectorAll('.matching-button:not(.matched)').forEach(btn => btn.disabled = false);
+                }, 1000); // ค้างไว้ 1 วินาที
             }
         }
         
         function endMatchingGame() {
             clearInterval(matchingTimerInterval);
-            showScreen('matching-result-screen');
-            matchingFinalScore.textContent = `${matchingTimer} วินาที`;
-            
-            // Save matching game score to matchingLeaderboard
-            if (currentPlayer) {
-                const newScoreRef = matchingLeaderboardRef.push();
-                newScoreRef.set({
-                    id: currentPlayer.id,
-                    name: currentPlayer.name,
-                    time: matchingTimer,
-                    timestamp: firebase.database.ServerValue.TIMESTAMP
-                });
+            showScreen(matchingResultScreen);
+            document.getElementById('matching-final-score').innerText = `${matchingTimer} วินาที`;
+            saveLeaderboardScore(matchingLeaderboardRef, { name: playerName, time: matchingTimer });
+        }
+        
+        function pauseMatchingGame() {
+            isPaused = true;
+            clearInterval(matchingTimerInterval);
+            matchingPauseButton.style.display = 'none';
+            matchingPausedControls.style.display = 'block';
+            document.querySelectorAll('.matching-button').forEach(btn => btn.disabled = true);
+            if (selectedButton) {
+                selectedButton.classList.remove('selected');
+                selectedButton = null;
             }
         }
 
-        // --- Event Listeners and Initial Load ---
-        startButton.addEventListener('click', () => {
-             if (currentPlayer) {
-                showScreen('mode-select-screen');
-            } else {
-                showScreen('name-input-screen');
-            }
-        });
+        function resumeMatchingGame() {
+            isPaused = false;
+            matchingPauseButton.style.display = 'block';
+            matchingPausedControls.style.display = 'none';
+            document.querySelectorAll('.matching-button:not(.matched)').forEach(btn => btn.disabled = false);
+            matchingTimerInterval = setInterval(() => {
+                matchingTimer++;
+                document.getElementById('matching-countdown').innerText = matchingTimer;
+            }, 1000);
+        }
         
-        multipleChoiceModeButton.addEventListener('click', () => {
-            showScreen('level-select-screen');
-            populateLevelSelect();
-        });
-        
-        matchingModeButton.addEventListener('click', () => {
-            startMatchingGame();
-        });
+        function resetMatchingGame() {
+            clearInterval(matchingTimerInterval);
+            isPaused = false;
+            selectedButton = null;
+            matchingPairsFound = 0;
+            matchingTimer = 0;
+        }
 
-        submitNameButton.addEventListener('click', () => {
-            const name = nameInput.value.trim();
-            if (name) {
-                playersRef.push({ name: name, unlockedLevels: 1 })
-                    .then((snapshot) => {
-                        currentPlayer = { id: snapshot.key, name: name, unlockedLevels: 1 };
-                        savePlayerState();
-                        showScreen('mode-select-screen');
-                    });
-            } else {
-                alert('กรุณาใส่ชื่อของคุณ!');
-            }
-        });
-
-        loginButton.addEventListener('click', () => {
-            const name = loginNameInput.value.trim();
-            if (name) {
-                playersRef.orderByChild('name').equalTo(name).once('value', (snapshot) => {
-                    const players = snapshot.val();
-                    if (players) {
-                        const playerId = Object.keys(players)[0];
-                        currentPlayer = { id: playerId, ...players[playerId] };
-                        savePlayerState();
-                        alert(`ยินดีต้อนรับกลับ, ${currentPlayer.name}!`);
-                        showScreen('mode-select-screen');
-                    } else {
-                        alert('ไม่พบชื่อผู้ใช้นี้ กรุณาสมัครชื่อใหม่');
-                        showScreen('name-input-screen');
-                    }
-                });
-            } else {
-                alert('กรุณาใส่ชื่อของคุณ!');
-            }
-        });
-        
-        resumeLastGameButton.addEventListener('click', () => {
-            if (currentPlayer) {
-                showScreen('level-select-screen');
-                populateLevelSelect();
-            }
-        });
-        
-        goToLoginButton.addEventListener('click', () => showScreen('login-screen'));
-        goToSignupButton.addEventListener('click', () => showScreen('name-input-screen'));
-        goToHomeFromLevelSelectButton.addEventListener('click', () => showScreen('start-screen'));
-        goToHomeFromModeSelectButton.addEventListener('click', () => showScreen('start-screen'));
-
-        continueButton.addEventListener('click', () => {
-            if (currentLevel < allWords.length) {
-                startLevel(currentLevel + 1);
-            } else {
-                alert('คุณเก่งมาก! เล่นจบทุกเลเวลแล้ว!');
-                showScreen('level-select-screen');
-                populateLevelSelect();
-            }
-        });
-        
-        restartButton.addEventListener('click', () => {
-            showScreen('level-select-screen');
-            populateLevelSelect();
-        });
-        
-        matchingRestartButton.addEventListener('click', () => showScreen('start-screen'));
-        
-        playAgainMatchingButton.addEventListener('click', () => startMatchingGame());
+        // --- Event Listeners ---
+        window.onload = () => {
+            showScreen(startScreen);
+            updateLeaderboard('mc');
+        };
         
         mcLeaderboardButton.addEventListener('click', () => {
             mcLeaderboardButton.classList.add('active');
             matchingLeaderboardButton.classList.remove('active');
             mcLeaderboardTable.classList.remove('hidden-table');
             matchingLeaderboardTable.classList.add('hidden-table');
-            fetchMCLeaderboard();
+            updateLeaderboard('mc');
         });
-        
+
         matchingLeaderboardButton.addEventListener('click', () => {
             matchingLeaderboardButton.classList.add('active');
             mcLeaderboardButton.classList.remove('active');
             matchingLeaderboardTable.classList.remove('hidden-table');
             mcLeaderboardTable.classList.add('hidden-table');
-            fetchMatchingLeaderboard();
+            updateLeaderboard('matching');
         });
 
-        pauseButton.addEventListener('click', () => {
-            isPaused = true;
-            clearInterval(timerInterval);
-            resumeButton.style.display = 'inline-block';
-            levelSelectButton.style.display = 'inline-block';
-            homeButton.style.display = 'inline-block';
-            pauseButton.style.display = 'none';
-        });
-
-        resumeButton.addEventListener('click', () => {
-            isPaused = false;
-            startTimer();
-            resumeButton.style.display = 'none';
-            levelSelectButton.style.display = 'none';
-            homeButton.style.display = 'none';
-            pauseButton.style.display = 'inline-block';
-        });
-
-        // Initial load
-        document.addEventListener('DOMContentLoaded', () => {
-            if (currentPlayer) {
-                resumeLastGameButton.style.display = 'inline-block';
+        startButton.addEventListener('click', startNewGame);
+        
+        multipleChoiceModeButton.addEventListener('click', () => {
+            currentMode = 'mc';
+            if (isLoggedIn) {
+                showScreen(levelSelectScreen);
+                createLevelButtons();
             } else {
-                resumeLastGameButton.style.display = 'none';
+                startNewGame();
             }
-            fetchMCLeaderboard();
-            showScreen('start-screen');
+        });
+        
+        matchingModeButton.addEventListener('click', () => {
+            currentMode = 'matching';
+            if (isLoggedIn) {
+                showScreen(matchingGameArea);
+                startMatchingGame();
+            } else {
+                startNewGame();
+            }
+        });
+        
+        resumeLastGameButton.addEventListener('click', () => {
+            if (playerName) {
+                playersRef.child(playerName).once('value', (snapshot) => {
+                    const data = snapshot.val();
+                    if (data) {
+                        currentLevel = data.level;
+                        score = data.score;
+                        currentQuestionIndex = data.questionIndex;
+                        currentWords = shuffleArray(allWords[currentLevel - 1]);
+                        updateScoreAndLevel();
+                        showScreen(gameArea);
+                        showQuestion();
+                        resumeGame();
+                    } else {
+                        alert("ไม่พบข้อมูลผู้เล่น");
+                        showScreen(modeSelectScreen);
+                    }
+                });
+            }
+        });
+
+        submitNameButton.addEventListener('click', () => {
+            const name = nameInput.value.trim();
+            if (name) {
+                playersRef.child(name).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        alert('ชื่อนี้ถูกใช้แล้ว โปรดใช้ชื่ออื่น');
+                    } else {
+                        playerName = name;
+                        isLoggedIn = true;
+                        playersRef.child(playerName).set({ level: 1, score: 0, questionIndex: 0 });
+                        showScreen(modeSelectScreen);
+                    }
+                });
+            } else {
+                alert('กรุณากรอกชื่อ');
+            }
+        });
+
+        goToLoginButton.addEventListener('click', () => showScreen(loginScreen));
+        goToSignupButton.addEventListener('click', () => showScreen(nameInputScreen));
+
+        loginButton.addEventListener('click', () => {
+            const name = loginNameInput.value.trim();
+            if (name) {
+                playersRef.child(name).once('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        playerName = name;
+                        isLoggedIn = true;
+                        showScreen(modeSelectScreen);
+                    } else {
+                        alert('ไม่พบชื่อผู้ใช้ โปรดลองอีกครั้ง');
+                    }
+                });
+            } else {
+                alert('กรุณากรอกชื่อ');
+            }
+        });
+
+        function createLevelButtons() {
+            levelGrid.innerHTML = '';
+            playersRef.child(playerName).once('value', (snapshot) => {
+                const playerData = snapshot.val();
+                const playerLevel = playerData ? playerData.level : 1;
+                for (let i = 1; i <= 10; i++) {
+                    const button = document.createElement('button');
+                    button.innerText = i;
+                    button.classList.add('level-button');
+                    if (i > playerLevel) {
+                        button.classList.add('locked');
+                    } else {
+                        button.addEventListener('click', () => loadLevel(i));
+                    }
+                    levelGrid.appendChild(button);
+                }
+            });
+        }
+
+        continueButton.addEventListener('click', () => {
+            currentLevel++;
+            score = 0;
+            currentQuestionIndex = 0;
+            loadLevel(currentLevel);
+        });
+        
+        restartButton.addEventListener('click', () => {
+            showScreen(levelSelectScreen);
+            createLevelButtons();
+            totalTime = 0;
+        });
+        
+        playAgainMatchingButton.addEventListener('click', () => {
+            showScreen(matchingGameArea);
+            startMatchingGame();
+        });
+        
+        matchingRestartButton.addEventListener('click', () => {
+            showScreen(startScreen);
+            updateLeaderboard('mc');
+            resetMatchingGame();
+        });
+
+        pauseButton.addEventListener('click', pauseGame);
+        resumeButton.addEventListener('click', resumeGame);
+        homeButton.addEventListener('click', () => {
+            pauseGame();
+            showScreen(startScreen);
+        });
+        levelSelectButton.addEventListener('click', () => {
+            pauseGame();
+            showScreen(levelSelectScreen);
+            createLevelButtons();
+        });
+
+        goToHomeFromLevelSelect.addEventListener('click', () => showScreen(startScreen));
+        goToHomeFromModeSelect.addEventListener('click', () => showScreen(startScreen));
+
+        // --- Matching Mode New Buttons ---
+        matchingPauseButton.addEventListener('click', pauseMatchingGame);
+        matchingResumeButton.addEventListener('click', resumeMatchingGame);
+        matchingHomeButton.addEventListener('click', () => {
+            resetMatchingGame();
+            showScreen(startScreen);
+            updateLeaderboard('mc');
         });
     </script>
 
