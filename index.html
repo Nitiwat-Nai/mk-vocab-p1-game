@@ -594,7 +594,7 @@
             const pad = (num) => num.toString().padStart(2, '0');
             return `${pad(minutes)}:${pad(remainingSeconds)}`;
         }
-
+        
         // --- Leaderboard Functions ---
         function updateLeaderboard(mode) {
             const ref = mode === 'mc' ? mcLeaderboardRef : matchingLeaderboardRef;
@@ -621,7 +621,7 @@
                             <td>${item.name}</td>
                             <td>${item.level}</td>
                             <td>${item.score}</td>
-                            <td>${formatTime(item.time)}</td>
+                            <td>${item.time} วินาที</td>
                         `;
                     } else {
                         row.innerHTML = `
@@ -699,13 +699,15 @@
             countdownElement.innerText = timeLeft;
 
             const currentWord = currentWords[currentQuestionIndex];
-            questionElement.innerText = currentWord.english.toUpperCase();
+            // แก้ไข: โจทย์เปลี่ยนจาก english เป็น thai
+            questionElement.innerText = currentWord.thai.toUpperCase();
 
-            const options = [currentWord.thai];
+            // แก้ไข: ตัวเลือกเปลี่ยนจาก thai เป็น english
+            const options = [currentWord.english];
             while (options.length < 4) {
                 const randomWord = allWords.flat()[Math.floor(Math.random() * allWords.flat().length)];
-                if (!options.includes(randomWord.thai)) {
-                    options.push(randomWord.thai);
+                if (!options.includes(randomWord.english)) {
+                    options.push(randomWord.english);
                 }
             }
 
@@ -715,7 +717,8 @@
                 const button = document.createElement('button');
                 button.innerText = option;
                 button.classList.add('option-button');
-                button.addEventListener('click', () => checkAnswer(option, currentWord.thai, button));
+                // แก้ไข: checkAnswer ใช้ english เป็นคำตอบที่ถูกต้อง
+                button.addEventListener('click', () => checkAnswer(option, currentWord.english, button));
                 optionsContainer.appendChild(button);
             });
         }
