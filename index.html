@@ -23,7 +23,6 @@
 
         body {
             font-family: 'Mitr', sans-serif;
-            background-image: url('https://raw.githubusercontent.com/Nitiwat-Nai/my-image-host/refs/heads/main/Match.jpg');
             background-size: cover;
             background-position: center;
             background-repeat: no-repeat;
@@ -36,6 +35,7 @@
             margin: 0;
             text-align: center;
             padding: 20px;
+            transition: background-image 0.5s ease-in-out;
         }
 
         .container {
@@ -566,8 +566,34 @@
         let isLoggedIn = false;
         let playerName = '';
         let currentMode = 'mc'; // 'mc' for multiple choice, 'matching' for matching
+        
+        // --- Background Images ---
+        const backgroundImages = {
+            main: 'https://raw.githubusercontent.com/Nitiwat-Nai/my-image-host/refs/heads/main/Main.jpg',
+            choice: 'https://raw.githubusercontent.com/Nitiwat-Nai/my-image-host/refs/heads/main/Choice.jpg',
+            matching: 'https://raw.githubusercontent.com/Nitiwat-Nai/my-image-host/refs/heads/main/Match.jpg'
+        };
 
         // --- Screen Management ---
+        function setBackground(screenType) {
+            const body = document.body;
+            let imageUrl = '';
+            switch (screenType) {
+                case 'main':
+                    imageUrl = backgroundImages.main;
+                    break;
+                case 'choice':
+                    imageUrl = backgroundImages.choice;
+                    break;
+                case 'matching':
+                    imageUrl = backgroundImages.matching;
+                    break;
+                default:
+                    imageUrl = backgroundImages.main;
+            }
+            body.style.backgroundImage = `url('${imageUrl}')`;
+        }
+
         function showScreen(screen) {
             const screens = [startScreen, modeSelectScreen, nameInputScreen, loginScreen, levelSelectScreen, gameArea, matchingGameArea, resultScreen, matchingResultScreen];
             screens.forEach(s => {
@@ -577,6 +603,15 @@
                     s.style.display = 'none';
                 }
             });
+            
+            // เพิ่มส่วนนี้เพื่อเปลี่ยนพื้นหลังตามหน้าจอ
+            if (screen === startScreen || screen === nameInputScreen || screen === loginScreen || screen === modeSelectScreen) {
+                setBackground('main');
+            } else if (screen === levelSelectScreen || screen === gameArea || screen === resultScreen) {
+                setBackground('choice');
+            } else if (screen === matchingGameArea || screen === matchingResultScreen) {
+                setBackground('matching');
+            }
         }
 
         // --- Utility Functions ---
@@ -600,20 +635,33 @@
             const ref = mode === 'mc' ? mcLeaderboardRef : matchingLeaderboardRef;
             const tbody = mode === 'mc' ? mcLeaderboardBody : matchingLeaderboardBody;
 
-            ref.orderByChild(mode === 'mc' ? 'score' : 'time').limitToLast(10).once('value', (snapshot) => {
+            ref.once('value', (snapshot) => {
                 const scores = [];
                 snapshot.forEach((child) => {
                     scores.push(child.val());
                 });
-                // Sort based on score (desc) for MC and time (asc) for Matching
+
                 if (mode === 'mc') {
-                    scores.sort((a, b) => b.score - a.score || a.time - b.time);
+                    // เรียงลำดับตาม เลเวล (มากไปน้อย), คะแนน (มากไปน้อย), และเวลา (น้อยไปมาก)
+                    scores.sort((a, b) => {
+                        if (b.level !== a.level) {
+                            return b.level - a.level; // เรียงตามเลเวลจากมากไปน้อย
+                        }
+                        if (b.score !== a.score) {
+                            return b.score - a.score; // เรียงตามคะแนนจากมากไปน้อย
+                        }
+                        return a.time - b.time; // เรียงตามเวลาจากน้อยไปมาก
+                    });
                 } else {
+                    // โหมดจับคู่ยังคงเรียงตามเวลาจากน้อยไปมาก
                     scores.sort((a, b) => a.time - b.time);
                 }
 
+                // จำกัดให้แสดงแค่ 10 อันดับแรก
+                const top10Scores = scores.slice(0, 10);
+
                 tbody.innerHTML = '';
-                scores.forEach((item, index) => {
+                top10Scores.forEach((item, index) => {
                     const row = document.createElement('tr');
                     if (mode === 'mc') {
                         row.innerHTML = `
